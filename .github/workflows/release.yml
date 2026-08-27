@@ -15,6 +15,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write # required for npm Trusted Publishing (OIDC) — no NPM_TOKEN needed
 
 jobs:
   release:
@@ -31,13 +32,10 @@ jobs:
           node-version: "20"
           registry-url: "https://registry.npmjs.org"
 
-      # Fails fast if NPM_TOKEN is missing/expired/revoked, before touching
-      # package.json, git, or npm — no point building and bumping the
-      # version only to find out publish would have failed anyway.
-      - name: Verify npm token
-        run: npm whoami
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # Trusted Publishing needs a recent npm CLI — the one bundled with
+      # Node 20 predates it.
+      - name: Update npm
+        run: npm install -g npm@latest
 
       - name: Install dependencies
         run: npm install
@@ -62,13 +60,15 @@ jobs:
         run: |
           npm version ${{ github.event.inputs.bump }} -m "chore(release): v%s"
 
-      # Publish before pushing anything — if this fails (bad token, name
-      # taken, etc.) the release attempt can just be fixed and rerun without
-      # any git state having been pushed yet.
+      # Publish before pushing anything — if this fails (trusted publisher
+      # not configured yet, name taken, etc.) the release attempt can just
+      # be fixed and rerun without any git state having been pushed yet.
+      # No token: npm's CLI detects the GitHub Actions OIDC context and
+      # exchanges it for a short-lived publish credential automatically,
+      # provided the trusted publisher is configured on npmjs.com for this
+      # exact repo + workflow file.
       - name: Publish to npm
         run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Push commit and tag
         run: git push origin HEAD --follow-tags
