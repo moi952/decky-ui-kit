@@ -1,0 +1,110 @@
+name: Bump & Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Select version bump type"
+        required: true
+        default: patch
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
+
+      # Fails fast if NPM_TOKEN is missing/expired/revoked, before touching
+      # package.json, git, or npm — no point building and bumping the
+      # version only to find out publish would have failed anyway.
+      - name: Verify npm token
+        run: npm whoami
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Setup Git user
+        run: |
+          git config user.name "decky-ui-kit CI"
+          git config user.email "ci@decky-ui-kit"
+
+      # dist/ is also committed (not gitignored) so a git-tag install
+      # (github:owner/repo#vX.Y.Z) still works with no "prepare" script to
+      # run — pnpm/npm block install-time build scripts on git/tarball deps
+      # by default. The npm registry doesn't need this: a published tarball
+      # is already built, since "prepare" ran locally at publish time below.
+      - name: Stage the build output
+        run: git add -f dist
+
+      - name: Bump version and create git tag
+        run: |
+          npm version ${{ github.event.inputs.bump }} -m "chore(release): v%s"
+
+      # Publish before pushing anything — if this fails (bad token, name
+      # taken, etc.) the release attempt can just be fixed and rerun without
+      # any git state having been pushed yet.
+      - name: Publish to npm
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Push commit and tag
+        run: git push origin HEAD --follow-tags
+
+      # A tag pushed here with the default GITHUB_TOKEN does NOT trigger
+      # pages.yml's own "push: tags" event (GitHub blocks token-authored
+      # pushes from starting new workflow runs, to prevent infinite loops)
+      # — so the versioned docs deploy has to happen right here instead of
+      # relying on that trigger.
+      - name: Read new version
+        id: version
+        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Build demo for this version
+        run: npm run demo:build
+        env:
+          DEMO_VERSION_SEGMENT: ${{ steps.version.outputs.version }}
+
+      - name: Prepare gh-pages worktree
+        run: |
+          git fetch origin gh-pages 2>/dev/null || true
+          if git show-ref --verify --quiet refs/remotes/origin/gh-pages; then
+            git worktree add gh-pages-worktree origin/gh-pages
+          else
+            git worktree add --orphan -b gh-pages gh-pages-worktree
+          fi
+
+      - name: Publish this version's docs
+        run: node scripts/publish-docs.mjs gh-pages-worktree
+        env:
+          DEMO_VERSION_SEGMENT: ${{ steps.version.outputs.version }}
+          IS_RELEASE: "true"
+
+      - name: Commit and push docs
+        working-directory: gh-pages-worktree
+        run: |
+          git add -A
+          git commit -m "docs: publish ${{ steps.version.outputs.version }}" || echo "Nothing to commit"
+          git push origin HEAD:gh-pages

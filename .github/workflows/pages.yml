@@ -1,0 +1,77 @@
+name: Deploy demo to GitHub Pages (manual/backfill)
+
+# Real releases publish their versioned docs directly from release.yml (a
+# tag pushed with the default GITHUB_TOKEN doesn't trigger this workflow's
+# own push event — GitHub blocks token-authored pushes from starting new
+# workflow runs). This workflow is for the two cases release.yml doesn't
+# cover: previewing an unreleased build (leave "version" empty, publishes
+# to /decky-ui-kit/preview/, never touches "latest"), and backfilling a
+# version that predates this pipeline (fill "version" in, e.g. "0.1.0").
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Deploy as this exact released version instead of a preview build (e.g. 0.1.0) — for backfilling a version that predates this workflow"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pages-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Determine version segment
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            SEGMENT="${{ github.event.inputs.version }}"
+            IS_RELEASE=true
+          else
+            SEGMENT="preview"
+            IS_RELEASE=false
+          fi
+          echo "segment=$SEGMENT" >> "$GITHUB_OUTPUT"
+          echo "is_release=$IS_RELEASE" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - run: npm install
+
+      - name: Build demo for this version
+        run: npm run demo:build
+        env:
+          DEMO_VERSION_SEGMENT: ${{ steps.version.outputs.segment }}
+
+      - name: Prepare gh-pages worktree
+        run: |
+          git fetch origin gh-pages 2>/dev/null || true
+          if git show-ref --verify --quiet refs/remotes/origin/gh-pages; then
+            git worktree add gh-pages-worktree origin/gh-pages
+          else
+            git worktree add --orphan -b gh-pages gh-pages-worktree
+          fi
+
+      - name: Publish this version into the worktree
+        run: node scripts/publish-docs.mjs gh-pages-worktree
+        env:
+          DEMO_VERSION_SEGMENT: ${{ steps.version.outputs.segment }}
+          IS_RELEASE: ${{ steps.version.outputs.is_release }}
+
+      - name: Commit and push
+        working-directory: gh-pages-worktree
+        run: |
+          git config user.name "decky-ui-kit CI"
+          git config user.email "ci@decky-ui-kit"
+          git add -A
+          git commit -m "docs: publish ${{ steps.version.outputs.segment }}" || echo "Nothing to commit"
+          git push origin HEAD:gh-pages
