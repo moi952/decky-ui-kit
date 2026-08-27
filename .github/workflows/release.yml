@@ -29,11 +29,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           registry-url: "https://registry.npmjs.org"
 
-      # Trusted Publishing needs a recent npm CLI — the one bundled with
-      # Node 20 predates it.
+      # Trusted Publishing needs a recent npm CLI — the latest npm major
+      # also requires Node 22+, which is why Node itself was bumped above.
       - name: Update npm
         run: npm install -g npm@latest
 
