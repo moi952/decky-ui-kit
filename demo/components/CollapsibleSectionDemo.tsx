@@ -15,6 +15,9 @@ const RevealedContent: React.FC = () => (
   </div>
 );
 
+const genCode = (values: Record<string, any>) =>
+  `<CollapsibleSection\n  label="${values.label}"\n  expanded={expanded}\n  onToggle={() => setExpanded(!expanded)}\n>\n  <MyContent />\n</CollapsibleSection>`;
+
 export const CollapsibleSectionDemo: React.FC = () => {
   const [expanded1, setExpanded1] = useState(true);
   const [expanded2, setExpanded2] = useState(false);
@@ -25,6 +28,7 @@ export const CollapsibleSectionDemo: React.FC = () => {
         <Playground
           controls={controls}
           initialValues={initialValues}
+          genCode={genCode}
           render={(values, set) => (
             <CollapsibleSection
               label={values.label}
@@ -37,13 +41,19 @@ export const CollapsibleSectionDemo: React.FC = () => {
         />
       }
     >
-      <Section title="expanded (default)">
+      <Section
+        title="expanded (default)"
+        code={`<CollapsibleSection\n  label="Update history"\n  expanded={expanded}\n  onToggle={() => setExpanded(!expanded)}\n>\n  <MyContent />\n</CollapsibleSection>`}
+      >
         <CollapsibleSection label="Update history" expanded={expanded1} onToggle={() => setExpanded1((v) => !v)}>
           <RevealedContent />
         </CollapsibleSection>
       </Section>
 
-      <Section title="collapsed (default)">
+      <Section
+        title="collapsed (default)"
+        code={`<CollapsibleSection\n  label="Update history"\n  expanded={expanded}\n  onToggle={() => setExpanded(!expanded)}\n>\n  <MyContent />\n</CollapsibleSection>`}
+      >
         <CollapsibleSection label="Update history" expanded={expanded2} onToggle={() => setExpanded2((v) => !v)}>
           <RevealedContent />
         </CollapsibleSection>

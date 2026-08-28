@@ -6,6 +6,7 @@ import { DeckyIcon } from "./icons";
 import { AnchoredDropdownDemo } from "./components/AnchoredDropdownDemo";
 import { CollapsibleSectionDemo } from "./components/CollapsibleSectionDemo";
 import { FieldTextInputDemo } from "./components/FieldTextInputDemo";
+import { InlineConfirmDemo } from "./components/InlineConfirmDemo";
 import { VersionSwitcher } from "./components/VersionSwitcher";
 import { FOOTER_HINT_EVENT, FooterHint } from "./mocks/decky-ui";
 
@@ -309,6 +310,7 @@ const App: React.FC = () => {
             {active === "anchored-dropdown" && <AnchoredDropdownDemo />}
             {active === "collapsible-section" && <CollapsibleSectionDemo />}
             {active === "field-text-input" && <FieldTextInputDemo />}
+            {active === "inline-confirm" && <InlineConfirmDemo />}
           </div>
         </div>
       </div>

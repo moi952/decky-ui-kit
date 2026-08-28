@@ -58,7 +58,15 @@ export const COMPONENTS = [
       'labelPosition="right"',
       "highlightOnFocus={false}",
       'size="small"',
+      "placeholder",
+      "iconStart",
+      "iconEnd + placeholder",
     ],
+  },
+  {
+    id: "inline-confirm",
+    label: "InlineConfirm",
+    examples: ["shown inline, not a modal", 'size="medium"', 'variant="primary"'],
   },
 ];
 

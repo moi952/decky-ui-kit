@@ -82,6 +82,46 @@ const initialValues = {
   selectedValue: "opt0",
 };
 
+const genCode = (values: Record<string, any>) => {
+  const props: string[] = [];
+  if (values.variant !== "boxed") props.push(`  variant="${values.variant}"`);
+  if (values.focusStyle !== "fill") props.push(`  focusStyle="${values.focusStyle}"`);
+  if (values.size !== "default") props.push(`  size="${values.size}"`);
+  if (values.multiple) props.push(`  multiple`);
+  if (values.multiple && values.selectedValuesLayout !== "inline") {
+    props.push(`  selectedValuesLayout="${values.selectedValuesLayout}"`);
+  }
+  if (values.multiple && values.enableCountLabel) {
+    props.push(`  selectedCountLabel={(n) => \`${values.countLabelTemplate.replace("{n}", "${n}")}\`}`);
+  }
+  if (!values.blurBackground) props.push(`  blurBackground={false}`);
+  if (!values.bottomSeparator) props.push(`  bottomSeparator={false}`);
+  if (!values.highlightOnFocus) props.push(`  highlightOnFocus={false}`);
+  if (values.maxDisplayLines !== 1) props.push(`  maxDisplayLines={${values.maxDisplayLines}}`);
+  if (values.maxVisibleOptions !== undefined) props.push(`  maxVisibleOptions={${values.maxVisibleOptions}}`);
+  if (values.enableSecondaryButton) {
+    props.push(
+      `  onSecondaryButton={() => {}}`,
+      `  onSecondaryActionDescription="${values.onSecondaryActionDescription}"`,
+    );
+  }
+  if (values.enableOptionsButton) {
+    props.push(
+      `  onOptionsButton={() => {}}`,
+      `  onOptionsActionDescription="${values.onOptionsActionDescription}"`,
+    );
+  }
+  if (values.customColors) {
+    props.push(
+      `  bgColor="${values.bgColor}"`,
+      `  textColor="${values.textColor}"`,
+      `  borderColor="${values.borderColor}"`,
+    );
+  }
+  props.push(`  options={options}`, `  selectedValue={value}`, `  onChange={setValue}`);
+  return `<AnchoredDropdown\n${props.join("\n")}\n/>`;
+};
+
 export const AnchoredDropdownDemo: React.FC = () => {
   const [v1, setV1] = useState("a");
   const [v2, setV2] = useState("a");
@@ -105,6 +145,7 @@ export const AnchoredDropdownDemo: React.FC = () => {
         <Playground
           controls={controls}
           initialValues={initialValues}
+          genCode={genCode}
           render={(values, set) => (
             <AnchoredDropdown
               variant={values.variant}
@@ -149,7 +190,10 @@ export const AnchoredDropdownDemo: React.FC = () => {
         />
       }
     >
-      <Section title='variant="row" (default colors)'>
+      <Section
+        title='variant="row" (default colors)'
+        code={`<AnchoredDropdown\n  variant="row"\n  options={options}\n  selectedValue={value}\n  onChange={setValue}\n/>`}
+      >
         <AnchoredDropdown
           variant="row"
           options={OPTIONS}
@@ -158,11 +202,17 @@ export const AnchoredDropdownDemo: React.FC = () => {
         />
       </Section>
 
-      <Section title='variant="boxed" (default colors)'>
+      <Section
+        title='variant="boxed" (default colors)'
+        code={`<AnchoredDropdown\n  options={options}\n  selectedValue={value}\n  onChange={setValue}\n/>`}
+      >
         <AnchoredDropdown options={OPTIONS} selectedValue={v2} onChange={setV2} />
       </Section>
 
-      <Section title='focusStyle="outline"'>
+      <Section
+        title='focusStyle="outline"'
+        code={`<AnchoredDropdown\n  focusStyle="outline"\n  options={options}\n  selectedValue={value}\n  onChange={setValue}\n/>`}
+      >
         <AnchoredDropdown
           focusStyle="outline"
           options={OPTIONS}
@@ -171,7 +221,10 @@ export const AnchoredDropdownDemo: React.FC = () => {
         />
       </Section>
 
-      <Section title='size="small"'>
+      <Section
+        title='size="small"'
+        code={`<AnchoredDropdown\n  size="small"\n  options={options}\n  selectedValue={value}\n  onChange={setValue}\n/>`}
+      >
         <AnchoredDropdown
           size="small"
           options={OPTIONS}
@@ -180,7 +233,10 @@ export const AnchoredDropdownDemo: React.FC = () => {
         />
       </Section>
 
-      <Section title="custom colors (e.g. a themed wrapper)">
+      <Section
+        title="custom colors (e.g. a themed wrapper)"
+        code={`<AnchoredDropdown\n  bgColor="#2b1b4d"\n  textColor="#e0d4ff"\n  borderColor="#8b5cf6"\n  focusStyle="outline"\n  options={options}\n  selectedValue={value}\n  onChange={setValue}\n/>`}
+      >
         <AnchoredDropdown
           bgColor="#2b1b4d"
           textColor="#e0d4ff"
@@ -195,6 +251,7 @@ export const AnchoredDropdownDemo: React.FC = () => {
       <Section
         title="multiple + maxDisplayLines=2"
         description="How many lines the trigger's selected-values summary can wrap to before clipping."
+        code={`<AnchoredDropdown\n  multiple\n  maxDisplayLines={2}\n  options={options}\n  selectedValue={value}\n  onChange={setValue}\n/>`}
       >
         <AnchoredDropdown
           multiple
@@ -208,6 +265,7 @@ export const AnchoredDropdownDemo: React.FC = () => {
       <Section
         title="maxVisibleOptions=4 (12 options, scrolls)"
         description="How many option rows are visible in the open list before it scrolls."
+        code={`<AnchoredDropdown\n  size="small"\n  maxVisibleOptions={4}\n  options={options}\n  selectedValue={value}\n  onChange={setValue}\n/>`}
       >
         <AnchoredDropdown
           size="small"
@@ -218,7 +276,10 @@ export const AnchoredDropdownDemo: React.FC = () => {
         />
       </Section>
 
-      <Section title="blurBackground={false}">
+      <Section
+        title="blurBackground={false}"
+        code={`<AnchoredDropdown\n  blurBackground={false}\n  options={options}\n  selectedValue={value}\n  onChange={setValue}\n/>`}
+      >
         <AnchoredDropdown
           blurBackground={false}
           options={OPTIONS}
@@ -227,7 +288,10 @@ export const AnchoredDropdownDemo: React.FC = () => {
         />
       </Section>
 
-      <Section title="bottomSeparator={false}">
+      <Section
+        title="bottomSeparator={false}"
+        code={`<AnchoredDropdown\n  bottomSeparator={false}\n  options={options}\n  selectedValue={value}\n  onChange={setValue}\n/>`}
+      >
         <AnchoredDropdown
           bottomSeparator={false}
           options={OPTIONS}
@@ -236,7 +300,10 @@ export const AnchoredDropdownDemo: React.FC = () => {
         />
       </Section>
 
-      <Section title="highlightOnFocus={false}">
+      <Section
+        title="highlightOnFocus={false}"
+        code={`<AnchoredDropdown\n  highlightOnFocus={false}\n  options={options}\n  selectedValue={value}\n  onChange={setValue}\n/>`}
+      >
         <AnchoredDropdown
           highlightOnFocus={false}
           options={OPTIONS}
@@ -248,6 +315,7 @@ export const AnchoredDropdownDemo: React.FC = () => {
       <Section
         title="selectedCountLabel"
         description="Caller-formatted caption above the trigger once options are picked."
+        code={`<AnchoredDropdown\n  multiple\n  selectedCountLabel={(n) => \`\${n} selected\`}\n  options={options}\n  selectedValue={value}\n  onChange={setValue}\n/>`}
       >
         <AnchoredDropdown
           multiple
@@ -261,6 +329,7 @@ export const AnchoredDropdownDemo: React.FC = () => {
       <Section
         title='selectedValuesLayout="stacked"'
         description="Each selected value on its own line instead of comma-joined."
+        code={`<AnchoredDropdown\n  multiple\n  maxDisplayLines={0}\n  selectedValuesLayout="stacked"\n  options={options}\n  selectedValue={value}\n  onChange={setValue}\n/>`}
       >
         <AnchoredDropdown
           multiple
@@ -275,6 +344,7 @@ export const AnchoredDropdownDemo: React.FC = () => {
       <Section
         title="onSecondaryButton + onOptionsButton"
         description="Open the list — press X to toggle raw/formatted labels, Y to swap the row colors. Both show in the bottom bar."
+        code={`<AnchoredDropdown\n  options={options}\n  selectedValue={value}\n  onChange={setValue}\n  onSecondaryButton={() => toggleRawMode()}\n  onSecondaryActionDescription="show raw/formatted"\n  onOptionsButton={() => toggleColorMode()}\n  onOptionsActionDescription="swap colors"\n/>`}
       >
         <AnchoredDropdown
           options={

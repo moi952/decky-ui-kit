@@ -130,21 +130,26 @@ export const Field = forwardRef<HTMLDivElement, FieldProps>(
 interface DialogButtonProps {
   children?: React.ReactNode;
   className?: string;
+  style?: React.CSSProperties;
+  disabled?: boolean;
   onClick?: (e: any) => void;
 }
 
 export const DialogButton = forwardRef<HTMLButtonElement, DialogButtonProps>(
-  ({ children, className, onClick }, ref) => (
+  ({ children, className, style, disabled, onClick }, ref) => (
     <button
       ref={ref}
       className={className}
       onClick={onClick}
+      disabled={disabled}
       style={{
         border: "none",
-        cursor: "pointer",
+        cursor: disabled ? "default" : "pointer",
         font: "inherit",
         borderRadius: 4,
         outline: "none",
+        opacity: disabled ? 0.5 : 1,
+        ...style,
       }}
     >
       {children}

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { FaChevronDown, FaChevronRight } from "react-icons/fa";
 import { ControlConfig } from "../controls";
+import { CodeBlock } from "./CodeBlock";
 
 // Deliberately a light theme, breaking away from the dark Steam overlay
 // above it — this is meta dev-tool chrome, not part of what's being
@@ -40,13 +41,17 @@ interface PlaygroundProps {
   controls: ControlConfig[];
   initialValues: Record<string, any>;
   render: (values: Record<string, any>, set: (key: string, value: any) => void) => React.ReactNode;
+  // Mirrors `render`'s prop mapping as a JSX source string — kept separate
+  // since `render` also wires up demo-only plumbing (the `set` callbacks)
+  // that real usage code shouldn't show.
+  genCode?: (values: Record<string, any>) => string;
 }
 
 // A Storybook-style "Controls" panel, generic over any component: pass a
 // config array describing the props to expose plus a render function that
 // turns the current values into a live preview. Every component's demo
 // reuses this as-is — only the config and render differ.
-export const Playground: React.FC<PlaygroundProps> = ({ controls, initialValues, render }) => {
+export const Playground: React.FC<PlaygroundProps> = ({ controls, initialValues, render, genCode }) => {
   const [values, setValues] = useState(initialValues);
   const [controlsExpanded, setControlsExpanded] = useState(false);
   const set = (key: string, value: any) => setValues((v) => ({ ...v, [key]: value }));
@@ -58,6 +63,11 @@ export const Playground: React.FC<PlaygroundProps> = ({ controls, initialValues,
           Playground — every prop, live
         </div>
         {render(values, set)}
+        {genCode && (
+          <div style={{ marginTop: 12 }}>
+            <CodeBlock code={genCode(values)} />
+          </div>
+        )}
       </div>
 
       {/* Light background, deliberately not matching the dark overlay above

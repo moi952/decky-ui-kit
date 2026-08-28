@@ -124,5 +124,40 @@ import { FieldTextInput } from "@moi952/decky-ui-kit";
 | `mustBeNumeric` | `boolean` | `false` | Restricts input to numeric characters. |
 | `bottomSeparator` | `boolean` | `true` | Native Steam separator line below the row. |
 | `highlightOnFocus` | `boolean` | `true` | Background highlight while the input has focus. |
+| `placeholder` | `string` | — | Shown when empty (TextField has no native placeholder, this is a positioned overlay). |
+| `iconStart` | `ReactNode` | — | Icon at the start of the input. |
+| `iconEnd` | `ReactNode` | — | Icon at the end of the input. |
+
+</details>
+
+### `InlineConfirm`
+
+A destructive-action confirmation shown inline, right below whatever triggered it — not a modal. A description line plus an equal-width Cancel/Confirm button pair. No i18n of its own — pass your own translated labels.
+
+```tsx
+import { InlineConfirm } from "@moi952/decky-ui-kit";
+
+{confirming && (
+  <InlineConfirm
+    description="Remove the wrapper from this game?"
+    confirmLabel="Remove"
+    onCancel={() => setConfirming(false)}
+    onConfirm={() => { removeWrapper(); setConfirming(false); }}
+  />
+)}
+```
+
+<details>
+<summary>Props</summary>
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `description` | `ReactNode` | — | The confirmation message. |
+| `onCancel` | `() => void` | — | Called when Cancel is picked. |
+| `onConfirm` | `() => void` | — | Called when the confirm button is picked. |
+| `cancelLabel` | `ReactNode` | `"Cancel"` | Cancel button text. |
+| `confirmLabel` | `ReactNode` | `"Delete"` | Confirm button text. |
+| `size` | `"small" \| "medium" \| "large"` | `"small"` | Button padding/font size. |
+| `variant` | `"danger" \| "primary"` | `"danger"` | Red confirm button for a destructive action, or blue for a plain confirm. |
 
 </details>

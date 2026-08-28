@@ -8,5 +8,8 @@ export interface FieldTextInputProps {
     bottomSeparator?: boolean;
     highlightOnFocus?: boolean;
     labelPosition?: "top" | "left" | "right";
+    placeholder?: string;
+    iconStart?: React.ReactNode;
+    iconEnd?: React.ReactNode;
 }
 export declare const FieldTextInput: React.FC<FieldTextInputProps>;
