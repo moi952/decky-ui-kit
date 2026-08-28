@@ -62,8 +62,14 @@ import { AnchoredDropdown } from "@moi952/decky-ui-kit";
 | `borderColor` | `string` | `"transparent"` | Trigger and list border color. |
 | `blurBackground` | `boolean` | `true` | Blurs the panel behind the list while it's open. |
 | `multiple` | `boolean` | `false` | Multi-select mode (comma-joined value). |
-| `maxDisplayLines` | `number` | `1` | Lines the trigger's selected-value summary can wrap before clipping. |
-| `maxVisibleOptions` | `number` | — | Rows visible before the list scrolls. Defaults to a fixed max height. |
+| `selectedValuesLayout` | `"inline" \| "stacked"` | `"inline"` | Multi-select summary as one comma-joined line, or one value per line. |
+| `selectedCountLabel` | `(count: number) => ReactNode` | — | Multi-select only: small caption above the trigger once ≥1 option is picked (e.g. `n => \`${n} selected\``). No i18n of its own — the caller formats the text. |
+| `onSecondaryButton` | `() => void` | — | Fires on gamepad X / Steam "Secondary" while the trigger or open list has focus. |
+| `onSecondaryActionDescription` | `ReactNode` | — | Shown in Steam's own bottom action-legend bar next to the X prompt (only while `onSecondaryButton` is set). Same names/shape as `@decky/ui`'s own `FooterLegendProps`. |
+| `onOptionsButton` | `() => void` | — | Fires on gamepad Y / Steam "Options" while the trigger or open list has focus. |
+| `onOptionsActionDescription` | `ReactNode` | — | Shown in Steam's own bottom action-legend bar next to the Y prompt (only while `onOptionsButton` is set). |
+| `maxDisplayLines` | `number` | `1` | Lines the trigger's selected-value summary can wrap before clipping. `0` shows it in full, unclamped. |
+| `maxVisibleOptions` | `number` | — | Rows visible before the list scrolls. `0` shows every option, no cap. Defaults to a fixed max height. |
 | `highlightOnFocus` | `boolean` | `true` | Native Steam focus highlight band, themeable via CSS Loader. |
 | `bottomSeparator` | `boolean` | `true` | Native Steam separator line below the trigger. |
 
@@ -92,5 +98,31 @@ import { CollapsibleSection } from "@moi952/decky-ui-kit";
 | `expanded` | `boolean` | — | Whether the children are shown. State is owned by the caller. |
 | `onToggle` | `() => void` | — | Called on click/activate; flip `expanded` in response. |
 | `children` | `ReactNode` | — | Rendered below the header while `expanded` is `true`. |
+
+</details>
+
+### `FieldTextInput`
+
+A text input with the standard Field row look (bottom separator, focus highlight, size) — `@decky/ui`'s own `TextField` doesn't extend the same row contract `ToggleField`/`SliderField` do, so it renders bare by default.
+
+```tsx
+import { FieldTextInput } from "@moi952/decky-ui-kit";
+
+<FieldTextInput label="Frame Rate Limit" mustBeNumeric value={value} onChange={setValue} />
+```
+
+<details>
+<summary>Props</summary>
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `string` | — | Current value. |
+| `onChange` | `(value: string) => void` | — | Called with the new value on every keystroke. |
+| `label` | `ReactNode` | — | Label text/content. |
+| `size` | `"default" \| "small"` | `"default"` | Input font size and padding. |
+| `labelPosition` | `"top" \| "left" \| "right"` | `"top"` | Where the label sits relative to the input. |
+| `mustBeNumeric` | `boolean` | `false` | Restricts input to numeric characters. |
+| `bottomSeparator` | `boolean` | `true` | Native Steam separator line below the row. |
+| `highlightOnFocus` | `boolean` | `true` | Background highlight while the input has focus. |
 
 </details>

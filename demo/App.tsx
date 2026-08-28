@@ -5,7 +5,9 @@ import { slugify } from "./slug";
 import { DeckyIcon } from "./icons";
 import { AnchoredDropdownDemo } from "./components/AnchoredDropdownDemo";
 import { CollapsibleSectionDemo } from "./components/CollapsibleSectionDemo";
+import { FieldTextInputDemo } from "./components/FieldTextInputDemo";
 import { VersionSwitcher } from "./components/VersionSwitcher";
+import { FOOTER_HINT_EVENT, FooterHint } from "./mocks/decky-ui";
 
 const TOPBAR_HEIGHT = 44;
 const BOTTOMBAR_HEIGHT = 32;
@@ -19,6 +21,13 @@ const App: React.FC = () => {
   const [pendingScrollId, setPendingScrollId] = useState<string | null>(() => parseHash().exampleId);
   const leftPanelRef = useRef<HTMLDivElement>(null);
   const rightPanelRef = useRef<HTMLDivElement>(null);
+  const [footerHints, setFooterHints] = useState<FooterHint[]>([]);
+
+  useEffect(() => {
+    const onHint = (e: Event) => setFooterHints((e as CustomEvent).detail ?? []);
+    window.addEventListener(FOOTER_HINT_EVENT, onHint);
+    return () => window.removeEventListener(FOOTER_HINT_EVENT, onHint);
+  }, []);
 
   // Direct links (including a shared "#component/example" URL) and browser
   // back/forward both land here.
@@ -299,12 +308,43 @@ const App: React.FC = () => {
             </div>
             {active === "anchored-dropdown" && <AnchoredDropdownDemo />}
             {active === "collapsible-section" && <CollapsibleSectionDemo />}
+            {active === "field-text-input" && <FieldTextInputDemo />}
           </div>
         </div>
       </div>
 
-      {/* Bottom bar */}
-      <div style={{ height: BOTTOMBAR_HEIGHT, flexShrink: 0, background: "#000" }} />
+      {/* Bottom bar — stands in for Steam's real action-legend bar */}
+      <div
+        style={{
+          height: BOTTOMBAR_HEIGHT,
+          flexShrink: 0,
+          background: "#000",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-end",
+          padding: "0 20px",
+          gap: 16,
+          color: "#8b929a",
+          fontSize: 12,
+        }}
+      >
+        {footerHints.map((hint) => (
+          <span key={hint.key} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <span
+              style={{
+                background: "#2a2f36",
+                color: "#e6eaed",
+                borderRadius: 4,
+                padding: "2px 8px",
+                fontWeight: 700,
+              }}
+            >
+              {hint.key}
+            </span>
+            {hint.text}
+          </span>
+        ))}
+      </div>
     </div>
   );
 };

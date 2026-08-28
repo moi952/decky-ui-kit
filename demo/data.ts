@@ -38,12 +38,27 @@ export const COMPONENTS = [
       "blurBackground={false}",
       "bottomSeparator={false}",
       "highlightOnFocus={false}",
+      "selectedCountLabel",
+      'selectedValuesLayout="stacked"',
+      "onSecondaryButton + onOptionsButton",
     ],
   },
   {
     id: "collapsible-section",
     label: "CollapsibleSection",
     examples: ["expanded (default)", "collapsed (default)"],
+  },
+  {
+    id: "field-text-input",
+    label: "FieldTextInput",
+    examples: [
+      "mustBeNumeric",
+      "free text, no label",
+      'labelPosition="left"',
+      'labelPosition="right"',
+      "highlightOnFocus={false}",
+      'size="small"',
+    ],
   },
 ];
 

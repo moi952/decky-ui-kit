@@ -11,11 +11,45 @@ const controls: ControlConfig[] = [
   { key: "focusStyle", label: "focusStyle", type: "select", options: ["fill", "outline"] },
   { key: "size", label: "size", type: "select", options: ["default", "small"] },
   { key: "maxDisplayLines", label: "maxDisplayLines", type: "number", min: 1 },
-  { key: "maxVisibleOptions", label: "maxVisibleOptions", type: "number", min: 1, placeholder: "(default)" },
+  {
+    key: "maxVisibleOptions",
+    label: "maxVisibleOptions (0 = all)",
+    type: "number",
+    min: 0,
+    placeholder: "(default)",
+  },
   { key: "multiple", label: "multiple", type: "checkbox" },
+  {
+    key: "selectedValuesLayout",
+    label: "selectedValuesLayout",
+    type: "select",
+    options: ["inline", "stacked"],
+    showIf: (v) => v.multiple,
+  },
+  { key: "enableCountLabel", label: "selectedCountLabel", type: "checkbox", showIf: (v) => v.multiple },
+  {
+    key: "countLabelTemplate",
+    label: "countLabel text ({n})",
+    type: "text",
+    showIf: (v) => v.multiple && v.enableCountLabel,
+  },
   { key: "blurBackground", label: "blurBackground", type: "checkbox" },
   { key: "bottomSeparator", label: "bottomSeparator", type: "checkbox" },
   { key: "highlightOnFocus", label: "highlightOnFocus", type: "checkbox" },
+  { key: "enableSecondaryButton", label: "onSecondaryButton (X)", type: "checkbox" },
+  {
+    key: "onSecondaryActionDescription",
+    label: "secondary hint text",
+    type: "text",
+    showIf: (v) => v.enableSecondaryButton,
+  },
+  { key: "enableOptionsButton", label: "onOptionsButton (Y)", type: "checkbox" },
+  {
+    key: "onOptionsActionDescription",
+    label: "options hint text",
+    type: "text",
+    showIf: (v) => v.enableOptionsButton,
+  },
   { key: "customColors", label: "custom colors", type: "checkbox" },
   { key: "bgColor", label: "bgColor", type: "color", showIf: (v) => v.customColors },
   { key: "textColor", label: "textColor", type: "color", showIf: (v) => v.customColors },
@@ -27,11 +61,20 @@ const initialValues = {
   focusStyle: "fill",
   size: "default",
   multiple: false,
+  selectedValuesLayout: "inline",
+  enableCountLabel: true,
+  countLabelTemplate: "{n} selected",
   blurBackground: true,
   bottomSeparator: true,
   highlightOnFocus: true,
   maxDisplayLines: 1,
   maxVisibleOptions: undefined,
+  enableSecondaryButton: false,
+  onSecondaryActionDescription: "secondary action",
+  secondaryPressed: false,
+  enableOptionsButton: false,
+  onOptionsActionDescription: "options action",
+  optionsPressed: false,
   customColors: false,
   bgColor: "#35373c",
   textColor: "#bfbfbf",
@@ -50,6 +93,11 @@ export const AnchoredDropdownDemo: React.FC = () => {
   const [v8, setV8] = useState("a");
   const [v9, setV9] = useState("a");
   const [v10, setV10] = useState("a");
+  const [v11, setV11] = useState("a,c,e");
+  const [v12, setV12] = useState("a");
+  const [v13, setV13] = useState("a,c,e");
+  const [rawMode, setRawMode] = useState(false);
+  const [colorMode, setColorMode] = useState(false);
 
   return (
     <DemoPage
@@ -63,11 +111,33 @@ export const AnchoredDropdownDemo: React.FC = () => {
               focusStyle={values.focusStyle}
               size={values.size}
               multiple={values.multiple}
+              selectedValuesLayout={values.selectedValuesLayout}
               blurBackground={values.blurBackground}
               bottomSeparator={values.bottomSeparator}
               highlightOnFocus={values.highlightOnFocus}
               maxDisplayLines={values.maxDisplayLines}
               maxVisibleOptions={values.maxVisibleOptions}
+              selectedCountLabel={
+                values.multiple && values.enableCountLabel
+                  ? (n: number) => values.countLabelTemplate.replace("{n}", String(n))
+                  : undefined
+              }
+              onSecondaryButton={
+                values.enableSecondaryButton ? () => set("secondaryPressed", !values.secondaryPressed) : undefined
+              }
+              onSecondaryActionDescription={
+                values.enableSecondaryButton
+                  ? `${values.onSecondaryActionDescription}${values.secondaryPressed ? " (pressed)" : ""}`
+                  : undefined
+              }
+              onOptionsButton={
+                values.enableOptionsButton ? () => set("optionsPressed", !values.optionsPressed) : undefined
+              }
+              onOptionsActionDescription={
+                values.enableOptionsButton
+                  ? `${values.onOptionsActionDescription}${values.optionsPressed ? " (pressed)" : ""}`
+                  : undefined
+              }
               {...(values.customColors
                 ? { bgColor: values.bgColor, textColor: values.textColor, borderColor: values.borderColor }
                 : {})}
@@ -172,6 +242,51 @@ export const AnchoredDropdownDemo: React.FC = () => {
           options={OPTIONS}
           selectedValue={v10}
           onChange={setV10}
+        />
+      </Section>
+
+      <Section
+        title="selectedCountLabel"
+        description="Caller-formatted caption above the trigger once options are picked."
+      >
+        <AnchoredDropdown
+          multiple
+          selectedCountLabel={(n) => `${n} selected`}
+          options={MULTI_OPTIONS}
+          selectedValue={v11}
+          onChange={setV11}
+        />
+      </Section>
+
+      <Section
+        title='selectedValuesLayout="stacked"'
+        description="Each selected value on its own line instead of comma-joined."
+      >
+        <AnchoredDropdown
+          multiple
+          maxDisplayLines={0}
+          selectedValuesLayout="stacked"
+          options={MULTI_OPTIONS}
+          selectedValue={v13}
+          onChange={setV13}
+        />
+      </Section>
+
+      <Section
+        title="onSecondaryButton + onOptionsButton"
+        description="Open the list — press X to toggle raw/formatted labels, Y to swap the row colors. Both show in the bottom bar."
+      >
+        <AnchoredDropdown
+          options={
+            rawMode ? OPTIONS.map((o) => ({ ...o, label: o.value })) : OPTIONS
+          }
+          {...(colorMode ? { bgColor: "#2b1b4d", textColor: "#e0d4ff", borderColor: "#8b5cf6" } : {})}
+          selectedValue={v12}
+          onChange={setV12}
+          onSecondaryButton={() => setRawMode((r) => !r)}
+          onSecondaryActionDescription="show raw/formatted"
+          onOptionsButton={() => setColorMode((c) => !c)}
+          onOptionsActionDescription="swap colors"
         />
       </Section>
     </DemoPage>

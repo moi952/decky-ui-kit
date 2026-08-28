@@ -15,6 +15,12 @@ export interface AnchoredDropdownProps {
     borderColor?: string;
     blurBackground?: boolean;
     multiple?: boolean;
+    selectedValuesLayout?: "inline" | "stacked";
+    selectedCountLabel?: (count: number) => React.ReactNode;
+    onSecondaryButton?: () => void;
+    onSecondaryActionDescription?: React.ReactNode;
+    onOptionsButton?: () => void;
+    onOptionsActionDescription?: React.ReactNode;
     maxDisplayLines?: number;
     maxVisibleOptions?: number;
     highlightOnFocus?: boolean;
