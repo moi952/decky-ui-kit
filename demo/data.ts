@@ -25,6 +25,18 @@ export const MULTI_OPTIONS = [
 // must match its Section's title exactly (see Section.tsx / slug.ts).
 export const COMPONENTS = [
   {
+    id: "action-button",
+    label: "ActionButton",
+    examples: [
+      'variant="normal" — the native DialogButton, untouched',
+      'variant="bordered" — translucent gray card',
+      'variant="danger" — destructive action',
+      'variant="primary" — non-destructive confirm',
+      "disabled",
+      "every variant, side by side",
+    ],
+  },
+  {
     id: "anchored-dropdown",
     label: "AnchoredDropdown",
     examples: [
@@ -64,9 +76,43 @@ export const COMPONENTS = [
     ],
   },
   {
+    id: "info-table",
+    label: "InfoTable",
+    examples: [
+      "version + source + path",
+      "with an accented row",
+      "long value, wraps instead of clipping",
+      "custom colors (e.g. a themed wrapper)",
+    ],
+  },
+  {
     id: "inline-confirm",
     label: "InlineConfirm",
     examples: ["shown inline, not a modal", 'size="medium"', 'variant="primary"'],
+  },
+  {
+    id: "media-row",
+    label: "MediaRow",
+    examples: [
+      "status-stack app row, collapsed until pressed",
+      "cover-image capsule, no actions row",
+      'color="success" ("now playing")',
+      "every color, side by side",
+    ],
+  },
+  {
+    id: "screenshot-carousel",
+    label: "ScreenshotCarousel",
+    examples: ["several screenshots", "a single screenshot", "no screenshots"],
+  },
+  {
+    id: "status-card",
+    label: "StatusCard",
+    examples: [
+      "success, with an action",
+      'variant="error"',
+      "title only, no description or children",
+    ],
   },
 ];
 

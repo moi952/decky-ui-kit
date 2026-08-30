@@ -9,7 +9,7 @@ import { DemoPage } from "./DemoPage";
 const controls: ControlConfig[] = [
   { key: "label", label: "label", type: "text" },
   { key: "placeholder", label: "placeholder", type: "text" },
-  { key: "size", label: "size", type: "select", options: ["default", "small"] },
+  { key: "size", label: "size", type: "select", options: ["small", "medium", "large"] },
   { key: "labelPosition", label: "labelPosition", type: "select", options: ["top", "left", "right"] },
   { key: "mustBeNumeric", label: "mustBeNumeric", type: "checkbox" },
   { key: "bottomSeparator", label: "bottomSeparator", type: "checkbox" },
@@ -21,7 +21,7 @@ const controls: ControlConfig[] = [
 const initialValues = {
   label: "Frame Rate Limit",
   placeholder: "",
-  size: "default",
+  size: "medium",
   labelPosition: "top",
   mustBeNumeric: false,
   bottomSeparator: true,
@@ -35,7 +35,7 @@ const genCode = (values: Record<string, any>) => {
   const props: string[] = [];
   if (values.label) props.push(`  label="${values.label}"`);
   if (values.placeholder) props.push(`  placeholder="${values.placeholder}"`);
-  if (values.size !== "default") props.push(`  size="${values.size}"`);
+  if (values.size !== "medium") props.push(`  size="${values.size}"`);
   if (values.labelPosition !== "top") props.push(`  labelPosition="${values.labelPosition}"`);
   if (values.mustBeNumeric) props.push(`  mustBeNumeric`);
   if (!values.bottomSeparator) props.push(`  bottomSeparator={false}`);

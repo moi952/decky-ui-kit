@@ -1,2 +1,8 @@
 node_modules
+dist
 demo-dist
+demo/dist
+.DS_Store
+# This repo's own lockfile is package-lock.json (npm, matching CI) —
+# pnpm-lock.yaml only shows up here from an accidental `pnpm install`.
+pnpm-lock.yaml

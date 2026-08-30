@@ -9,7 +9,7 @@ import { DemoPage } from "./DemoPage";
 const controls: ControlConfig[] = [
   { key: "variant", label: "variant", type: "select", options: ["row", "boxed"] },
   { key: "focusStyle", label: "focusStyle", type: "select", options: ["fill", "outline"] },
-  { key: "size", label: "size", type: "select", options: ["default", "small"] },
+  { key: "size", label: "size", type: "select", options: ["small", "medium", "large"] },
   { key: "maxDisplayLines", label: "maxDisplayLines", type: "number", min: 1 },
   {
     key: "maxVisibleOptions",
@@ -59,7 +59,7 @@ const controls: ControlConfig[] = [
 const initialValues = {
   variant: "boxed",
   focusStyle: "fill",
-  size: "default",
+  size: "medium",
   multiple: false,
   selectedValuesLayout: "inline",
   enableCountLabel: true,
@@ -86,7 +86,7 @@ const genCode = (values: Record<string, any>) => {
   const props: string[] = [];
   if (values.variant !== "boxed") props.push(`  variant="${values.variant}"`);
   if (values.focusStyle !== "fill") props.push(`  focusStyle="${values.focusStyle}"`);
-  if (values.size !== "default") props.push(`  size="${values.size}"`);
+  if (values.size !== "medium") props.push(`  size="${values.size}"`);
   if (values.multiple) props.push(`  multiple`);
   if (values.multiple && values.selectedValuesLayout !== "inline") {
     props.push(`  selectedValuesLayout="${values.selectedValuesLayout}"`);

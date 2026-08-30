@@ -2,6 +2,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { DialogButton, Field, Focusable, GamepadButton } from "@decky/ui";
 import type { GamepadEvent } from "@decky/ui";
 import { FaChevronDown, FaChevronRight, FaCheck } from "react-icons/fa";
+import { ComponentSize, DEFAULT_PANEL_BACKGROUND, SIZE_STYLE } from "./internal/theme";
 
 interface DropdownOption {
   value: string;
@@ -13,11 +14,21 @@ export interface AnchoredDropdownProps {
   // Multi-select uses a comma-joined string, same as Decky's own convention.
   selectedValue: string;
   onChange: (value: string) => void;
+  // A caller-supplied description of what this dropdown picks (e.g. "Sort
+  // by") — passed straight through to the underlying native Field's own
+  // `label`, the same native row-label mechanism every other Decky
+  // settings field already uses, instead of a caller hand-rolling its own
+  // label element above this component (which doesn't get Field's own
+  // native label layout/spacing for free, and stacked outside Field can
+  // end up wrapped in whatever padding the caller's own outer container
+  // already applies, on top of Field's — see this same lesson already
+  // learned for SearchField/FieldTextInput).
+  label?: React.ReactNode;
   // "row": flat, matches surrounding rows. "boxed": bordered box + arrow.
   variant?: "row" | "boxed";
   // "fill": solid white on focus. "outline": transparent-border look.
   focusStyle?: "fill" | "outline";
-  size?: "default" | "small";
+  size?: ComponentSize;
   bgColor?: string;
   textColor?: string;
   borderColor?: string;
@@ -46,10 +57,26 @@ export interface AnchoredDropdownProps {
   bottomSeparator?: boolean;
 }
 
-const DEFAULT_BG = "#35373c";
+const DEFAULT_BG = DEFAULT_PANEL_BACKGROUND;
 const DEFAULT_TEXT = "#bfbfbf";
 const DEFAULT_BORDER = "transparent";
 const FALLBACK_RADIUS = "6px";
+
+// The trigger's own horizontal padding/vertical rhythm — fontSize and
+// minHeight (the actual height-determining values) come from the shared
+// SIZE_STYLE table instead (see internal/theme.ts), the same one
+// ActionButton/FieldTextInput use, so this trigger lines up with them at
+// "the same size" instead of merely resembling it — but only ever grows
+// from there (min-height, not height), so a long selected-value label
+// wrapping to 2+ lines (see maxDisplayLines) still has room to grow into
+// instead of getting clipped. The open option list below stays on its
+// own separate scale (OPTION_PADDING/OPTION_FONT_SIZE) — it has no
+// reason to match an external row's height.
+const TRIGGER_PADDING_V = { small: 6, medium: 10, large: 14 } as const;
+const TRIGGER_PADDING_H = { small: 10, medium: 14, large: 18 } as const;
+const OPTION_PADDING = { small: "4px 8px", medium: "10px 14px", large: "12px 16px" } as const;
+const OPTION_FONT_SIZE = { small: "11px", medium: "14px", large: "16px" } as const;
+const OPTION_ROW_HEIGHT = { small: 26, medium: 42, large: 48 } as const;
 // Shared across instances so "row" reuses a "boxed" one's measured radius.
 let sharedBoxedRadius: string | null = null;
 
@@ -78,9 +105,10 @@ export const AnchoredDropdown: React.FC<AnchoredDropdownProps> = ({
   options,
   selectedValue,
   onChange,
+  label,
   variant = "boxed",
   focusStyle = "fill",
-  size = "default",
+  size = "medium",
   bgColor = DEFAULT_BG,
   textColor = DEFAULT_TEXT,
   borderColor = DEFAULT_BORDER,
@@ -114,7 +142,7 @@ export const AnchoredDropdown: React.FC<AnchoredDropdownProps> = ({
   useLayoutEffect(() => {
     if (variant !== "boxed" || !triggerRef.current) return;
     const el = triggerRef.current;
-    const horizontalPadding = size === "small" ? 10 : 14;
+    const horizontalPadding = TRIGGER_PADDING_H[size];
     const overhead = horizontalPadding * 2 + 12 + 8;
     const measure = () => setLabelMaxWidth(Math.max(0, el.clientWidth - overhead));
     measure();
@@ -196,7 +224,7 @@ export const AnchoredDropdown: React.FC<AnchoredDropdownProps> = ({
   };
 
   // Padding + line-height + the option's 2px border.
-  const rowHeight = size === "small" ? 26 : 42;
+  const rowHeight = OPTION_ROW_HEIGHT[size];
   // 0 means "show every option, no scroll cap".
   const listMaxHeight =
     maxVisibleOptions === 0 ? undefined : maxVisibleOptions ? maxVisibleOptions * (rowHeight + 2) : 220;
@@ -221,11 +249,10 @@ export const AnchoredDropdown: React.FC<AnchoredDropdownProps> = ({
   const countCls = `${uid}-count`;
   const wrapperCls = `${uid}-wrapper`;
 
-  const optionPadding = size === "small" ? "4px 8px" : "10px 14px";
-  const optionFontSize = size === "small" ? "11px" : "14px";
-  const triggerPaddingH = size === "small" ? "10px" : "14px";
-  const triggerPadding = size === "small" ? `6px ${triggerPaddingH}` : `10px ${triggerPaddingH}`;
-  const triggerFontSize = size === "small" ? "12px" : "15px";
+  const optionPadding = OPTION_PADDING[size];
+  const optionFontSize = OPTION_FONT_SIZE[size];
+  const triggerPadding = `${TRIGGER_PADDING_V[size]}px ${TRIGGER_PADDING_H[size]}px`;
+  const { fontSize: triggerFontSize, minHeight: triggerMinHeight } = SIZE_STYLE[size];
 
   return (
     <div
@@ -251,15 +278,15 @@ export const AnchoredDropdown: React.FC<AnchoredDropdownProps> = ({
         }
         .${triggerCls} {
           box-sizing: border-box !important;
-          width: calc(100% - 6px) !important;
-          max-width: calc(100% - 6px) !important;
-          margin: 3px !important;
+          width: 100% !important;
+          max-width: 100% !important;
           display: flex !important;
           justify-content: space-between !important;
           align-items: center !important;
           gap: 8px !important;
           padding: ${triggerPadding} !important;
           font-size: ${triggerFontSize} !important;
+          min-height: ${triggerMinHeight}px !important;
           background: ${bgColor} !important;
           border: 1px solid ${borderColor} !important;
           color: ${textColor} !important;
@@ -335,6 +362,12 @@ export const AnchoredDropdown: React.FC<AnchoredDropdownProps> = ({
           return (
             <Field
               focusable
+              label={label}
+              // Field's own default isn't "label sits above the
+              // control" — explicit here so a caller-supplied label
+              // renders on top, the same convention FieldTextInput's own
+              // labelPosition="top" already uses.
+              childrenLayout={label ? "below" : undefined}
               highlightOnFocus={highlightOnFocus}
               bottomSeparator={bottomSeparator ? "standard" : "none"}
               childrenContainerWidth="max"
@@ -378,8 +411,9 @@ export const AnchoredDropdown: React.FC<AnchoredDropdownProps> = ({
             onOptionsButton={onOptionsButton}
             onOptionsActionDescription={onOptionsButton ? onOptionsActionDescription : undefined}
             label={
-              countNode ? (
+              label || countNode ? (
                 <div style={{ display: "flex", flexDirection: "column", gap: 2, width: "100%" }}>
+                  {label}
                   {countNode}
                   {displayLabel}
                 </div>

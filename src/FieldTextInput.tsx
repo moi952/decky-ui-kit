@@ -1,11 +1,12 @@
 import React from "react";
 import { Field, TextField } from "@decky/ui";
+import { ComponentSize, DEFAULT_ROUNDNESS, SIZE_STYLE } from "./internal/theme";
 
 export interface FieldTextInputProps {
   label?: React.ReactNode;
   value: string;
   onChange: (value: string) => void;
-  size?: "default" | "small";
+  size?: ComponentSize;
   mustBeNumeric?: boolean;
   bottomSeparator?: boolean;
   highlightOnFocus?: boolean;
@@ -23,7 +24,7 @@ export const FieldTextInput: React.FC<FieldTextInputProps> = ({
   label,
   value,
   onChange,
-  size = "default",
+  size = "medium",
   mustBeNumeric,
   bottomSeparator = true,
   highlightOnFocus = true,
@@ -32,11 +33,17 @@ export const FieldTextInput: React.FC<FieldTextInputProps> = ({
   iconStart,
   iconEnd,
 }) => {
-  const padV = size === "small" ? 6 : 10;
-  const padH = size === "small" ? 8 : 12;
+  const { fontSize, minHeight } = SIZE_STYLE[size];
+  // Horizontal-only — vertical rhythm comes entirely from the shared
+  // table's own minHeight below, not from padding, so this can never
+  // drift from what ActionButton/AnchoredDropdown's own trigger resolve
+  // to at "the same size". A native <input> never wraps to more than one
+  // line regardless, so minHeight vs. a fixed height makes no practical
+  // difference here — kept as minHeight anyway, only for consistency
+  // with the other two (which do need the real floor, not a hard cap).
+  const padH = { small: 8, medium: 12, large: 16 }[size];
   // Fixed regardless of size, so icon margins stay identical in both.
   const iconSlot = 30;
-  const fontSize = size === "small" ? 12 : 14;
 
   const input = (
     <div style={{ position: "relative", width: "100%" }}>
@@ -48,7 +55,14 @@ export const FieldTextInput: React.FC<FieldTextInputProps> = ({
           fontSize,
           width: "100%",
           boxSizing: "border-box",
-          padding: `${padV}px ${iconEnd ? iconSlot : padH}px ${padV}px ${iconStart ? iconSlot : padH}px`,
+          // No vertical padding — a native <input> already centers its
+          // own text within its box regardless of extra height, so
+          // minHeight alone reserves the room, guaranteeing this lines
+          // up with ActionButton/AnchoredDropdown's own trigger at "the
+          // same size" instead of merely resembling it.
+          padding: `0 ${iconEnd ? iconSlot : padH}px 0 ${iconStart ? iconSlot : padH}px`,
+          minHeight,
+          borderRadius: DEFAULT_ROUNDNESS,
         }}
       />
       {!value && placeholder && (

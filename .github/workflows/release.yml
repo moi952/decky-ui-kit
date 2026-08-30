@@ -48,14 +48,6 @@ jobs:
           git config user.name "decky-ui-kit CI"
           git config user.email "ci@decky-ui-kit"
 
-      # dist/ is also committed (not gitignored) so a git-tag install
-      # (github:owner/repo#vX.Y.Z) still works with no "prepare" script to
-      # run — pnpm/npm block install-time build scripts on git/tarball deps
-      # by default. The npm registry doesn't need this: a published tarball
-      # is already built, since "prepare" ran locally at publish time below.
-      - name: Stage the build output
-        run: git add -f dist
-
       - name: Bump version and create git tag
         run: |
           npm version ${{ github.event.inputs.bump }} -m "chore(release): v%s"

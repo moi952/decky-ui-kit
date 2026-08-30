@@ -130,6 +130,52 @@ import { FieldTextInput } from "@moi952/decky-ui-kit";
 
 </details>
 
+### `InfoTable`
+
+A bordered, rounded key/value table for a single entity's details — icon, short label, value right-aligned. Built for a detail screen (an app, a package, a save file, ...) sitting below its header: version, source, file path, and so on, one row each. A row's `accent` color (e.g. green for an available update) tints both its icon and its value.
+
+```tsx
+import { InfoTable } from "@moi952/decky-ui-kit";
+import { FiTag, FiUpload, FiFile } from "react-icons/fi";
+
+<InfoTable
+  rows={[
+    { icon: <FiTag size={13} />, label: "Version", value: "1.4.2" },
+    {
+      icon: <FiUpload size={13} />,
+      label: "Available",
+      value: "1.5.0",
+      accent: "#4caf50",
+    },
+    { icon: <FiFile size={13} />, label: "Path", value: "/home/deck/App.AppImage" },
+  ]}
+/>
+```
+
+<details>
+<summary>Props</summary>
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `rows` | `InfoTableRow[]` | — | The rows to render, top to bottom. |
+| `labelWidth` | `number` | `90` | Label column width — every row's value starts at this same x position. |
+| `labelColor` | `string` | Steam-like light gray | Label text color. |
+| `iconColor` | `string` | Steam-like dark gray | A row's icon color, when it has no `accent`. |
+| `valueColor` | `string` | `"#fff"` | A row's value color, when it has no `accent`. |
+| `bgColor` | `string` | Steam-like dark, translucent | Table background. |
+| `borderColor` | `string` | Steam-like dark, translucent | Table border. |
+
+`InfoTableRow`:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `icon` | `ReactNode` | — |
+| `label` | `ReactNode` | Short label on the left (fixed width, so values stay aligned across rows). |
+| `value` | `ReactNode` | Right-aligned; wraps on overflow rather than clipping. |
+| `accent` | `string` | Tints this row's icon and value (default: neutral gray icon, white value). |
+
+</details>
+
 ### `InlineConfirm`
 
 A destructive-action confirmation shown inline, right below whatever triggered it — not a modal. A description line plus an equal-width Cancel/Confirm button pair. No i18n of its own — pass your own translated labels.
@@ -159,5 +205,98 @@ import { InlineConfirm } from "@moi952/decky-ui-kit";
 | `confirmLabel` | `ReactNode` | `"Delete"` | Confirm button text. |
 | `size` | `"small" \| "medium" \| "large"` | `"small"` | Button padding/font size. |
 | `variant` | `"danger" \| "primary"` | `"danger"` | Red confirm button for a destructive action, or blue for a plain confirm. |
+
+</details>
+
+### `MediaRow`
+
+A focusable media+title(+details)(+actions) row. The same shape covers both "a list of apps, each with a status stack and inline Update/Exclude buttons" and "a grid of game capsules, each just a cover and a title" — which of the two a given instance looks like follows entirely from which props are passed: give it `actions` and it splits into a header + a separate collapsible action row; leave `actions` out and the whole thing is one single-press card. `mediaLayout="stretch"` swaps the centered-icon box for a fixed-height, auto-width cover-image box instead of the icon's centered square — the media sizes itself from its own aspect ratio, so it's never cropped.
+
+```tsx
+import { MediaRow } from "@moi952/decky-ui-kit";
+import { FiEyeOff } from "react-icons/fi";
+
+// A status-stack app row, with an inline action row
+<MediaRow
+  media={<img src={iconUrl} style={{ maxWidth: "100%", maxHeight: "100%" }} />}
+  title="Firefox"
+  details={
+    <div style={{ fontSize: 11, color: "#9aa1a8" }}>128.0</div>
+  }
+  onPress={() => openDetails()}
+  actions={
+    <ActionButton onClick={exclude}><FiEyeOff size={12} /></ActionButton>
+  }
+  color="transparent"
+  bottomSeparator
+/>
+
+// A cover-image capsule, no actions row at all
+<MediaRow
+  mediaLayout="stretch"
+  mediaHeight={37}
+  media={<img src={coverUrl} style={{ height: "100%", width: "auto" }} />}
+  title="Half-Life 2"
+  titleLines={2}
+  onPress={() => launch()}
+  spacing={4}
+  color="light"
+/>
+```
+
+<details>
+<summary>Props</summary>
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `media` | `ReactNode` | — | The leading visual — an `<img>`, a placeholder, badges overlaid on it. This component only sizes/positions the box around it. |
+| `mediaWidth` | `number` | `32` | Media box width — only used by `mediaLayout="fixed"`. |
+| `mediaHeight` | `number` | `32` | Media box height. |
+| `mediaLayout` | `"fixed" \| "stretch"` | `"fixed"` | `"fixed"`: media centered in an exact `mediaWidth`×`mediaHeight` box (a small icon). `"stretch"`: exactly `mediaHeight` tall, but no fixed width at all — the media renders at whatever width its own aspect ratio calls for at that height (e.g. `<img style={{ height: "100%", width: "auto" }} />`), so a cover image always shows in full. |
+| `title` | `ReactNode` | — | The row's title. |
+| `titleLines` | `number` | `1` | `1`: ellipsis-truncated single line. `>1`: line-clamped over that many lines. |
+| `details` | `ReactNode` | — | Extra content under the title — your own pre-colored status line(s). Omit for a title-only row. |
+| `onPress` | `() => void` | — | Called when the header is pressed. |
+| `actions` | `ReactNode` | — | Rendered in its own row below the header, inside a `Focusable`. Omit entirely for a single-button card with no action row. Given without `onPress`, pressing the header toggles this row instead of navigating. |
+| `collapsedByDefault` | `boolean` | `false` | Only relevant when `actions` is given and `onPress` isn't — starts with the actions row hidden until the header is pressed once. |
+| `color` | `"light" \| "dark" \| "transparent" \| "success" \| "danger" \| "info" \| "warning"` | — (required) | The row's own look — border + matching background. There's no "no color" state, so a row's border width never shifts depending on which color a sibling happens to have. `"light"`/`"dark"` are the two plain card backgrounds with no state implied; `"transparent"` is for a flush row inside a `bottomSeparator` list, which must show no card look of its own; the rest are accent colors for flagging a real state (e.g. `"success"` for "currently active"). |
+| `accentBorderColor` | `string` | — | Overrides `color`'s border color. |
+| `accentBorderWidth` | `number` | `2` | Border width — the same value applies to every color, so a row's size never shifts between states. |
+| `accentBackground` | `string` | — | Overrides `color`'s background color. |
+| `borderOnFocus` | `boolean` | `true` | A real border on focus/hover, via an inset box-shadow (not `outline` — outline doesn't respect border-radius). Independent of `highlightOnFocus` below — same convention as `ScreenshotCarousel`'s own `borderOnFocus`. |
+| `highlightColor` | `string` | `"#dcdedf"` | Border color on focus/hover (used when `borderOnFocus`). Same default across every focusable component in this library. |
+| `highlightOnFocus` | `boolean` | `true` | A background tint on focus/hover, independent of `borderOnFocus` above. |
+| `highlightBackground` | `string` | `"#2a3a4a"` | Background color on focus/hover (used when `highlightOnFocus`). |
+| `spacing` | `number` | `0` | Gap below the row, for a list of spaced-apart cards. An alternative to `bottomSeparator`, not meant combined with it. |
+| `bottomSeparator` | `boolean` | `false` | A bottom divider line, for a continuous divided list — the alternative to `spacing`. Pair with `color="transparent"` so the row shows no card background of its own, just the divider and the focus highlight. |
+| `onSecondaryButton` | `(evt) => void` | — | Fires on gamepad X / Steam "Secondary" while the row has focus. |
+| `onSecondaryActionDescription` | `ReactNode` | — | Shown in Steam's own bottom action-legend bar next to the X prompt (only while `onSecondaryButton` is set). |
+
+</details>
+
+### `ScreenshotCarousel`
+
+A single screenshot "stage" — app store/catalog "photos", one shown at a time, reading as one pressable card (same rounded corners, same `bottomSeparator`/focus-border conventions as `MediaRow`). Moved with DIR_LEFT/DIR_RIGHT or LB/RB (advertised in Steam's own bottom action-legend bar) — no on-screen prev/next buttons on this inline view, those only live in the full-screen zoom pressing the photo opens (a real Steam modal, via `showModal`/`ModalRoot`). Renders nothing at all when `screenshots` is empty, so a caller never needs its own length check around it.
+
+```tsx
+import { ScreenshotCarousel } from "@moi952/decky-ui-kit";
+
+<ScreenshotCarousel screenshots={entry.screenshots} height={140} />
+```
+
+<details>
+<summary>Props</summary>
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `screenshots` | `string[]` | — | Image URLs (or data URIs). Renders nothing when empty. |
+| `height` | `number` | `120` | Height of the inline (non-zoomed) view. |
+| `bottomSeparator` | `boolean` | `false` | A bottom divider line, for sitting inside a continuous divided list — same convention as `MediaRow`'s own `bottomSeparator`. |
+| `borderOnFocus` | `boolean` | `true` | A real border on focus/hover, via an inset box-shadow (not `outline`). Independent of `highlightOnFocus` below — same convention as `MediaRow`'s own `borderOnFocus`. |
+| `highlightColor` | `string` | `"#dcdedf"` | Border color on focus/hover (used when `borderOnFocus`). Same default across every focusable component in this library. |
+| `highlightOnFocus` | `boolean` | `true` | A background tint behind the stage on focus/hover (only visible where the photo doesn't already fill the box), independent of `borderOnFocus` above. |
+| `highlightBackground` | `string` | `"#2a3a4a"` | Background color on focus/hover (used when `highlightOnFocus`). |
+| `prevActionDescription` | `ReactNode` | `"Previous"` | Shown in Steam's own bottom action-legend bar next to the LB prompt (only while there's more than one screenshot). |
+| `nextActionDescription` | `ReactNode` | `"Next"` | Shown next to the RB prompt. |
 
 </details>

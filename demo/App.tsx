@@ -3,10 +3,15 @@ import { COMPONENTS, parseHash } from "./data";
 import { focusableIn } from "./focusableIn";
 import { slugify } from "./slug";
 import { DeckyIcon } from "./icons";
+import { ActionButtonDemo } from "./components/ActionButtonDemo";
 import { AnchoredDropdownDemo } from "./components/AnchoredDropdownDemo";
 import { CollapsibleSectionDemo } from "./components/CollapsibleSectionDemo";
 import { FieldTextInputDemo } from "./components/FieldTextInputDemo";
+import { InfoTableDemo } from "./components/InfoTableDemo";
 import { InlineConfirmDemo } from "./components/InlineConfirmDemo";
+import { MediaRowDemo } from "./components/MediaRowDemo";
+import { ScreenshotCarouselDemo } from "./components/ScreenshotCarouselDemo";
+import { StatusCardDemo } from "./components/StatusCardDemo";
 import { VersionSwitcher } from "./components/VersionSwitcher";
 import { FOOTER_HINT_EVENT, FooterHint } from "./mocks/decky-ui";
 
@@ -307,10 +312,15 @@ const App: React.FC = () => {
               <DeckyIcon />
               <span style={{ fontSize: 18, fontWeight: 700 }}>decky-ui-kit</span>
             </div>
+            {active === "action-button" && <ActionButtonDemo />}
             {active === "anchored-dropdown" && <AnchoredDropdownDemo />}
             {active === "collapsible-section" && <CollapsibleSectionDemo />}
             {active === "field-text-input" && <FieldTextInputDemo />}
+            {active === "info-table" && <InfoTableDemo />}
             {active === "inline-confirm" && <InlineConfirmDemo />}
+            {active === "media-row" && <MediaRowDemo />}
+            {active === "screenshot-carousel" && <ScreenshotCarouselDemo />}
+            {active === "status-card" && <StatusCardDemo />}
           </div>
         </div>
       </div>
