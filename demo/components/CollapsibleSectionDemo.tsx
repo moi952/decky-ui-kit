@@ -62,6 +62,7 @@ const genCode = (values: Record<string, any>) => {
 export const CollapsibleSectionDemo: React.FC = () => {
   const [expanded1, setExpanded1] = useState(true);
   const [expanded2, setExpanded2] = useState(false);
+  const [expanded3, setExpanded3] = useState(true);
 
   return (
     <DemoPage
@@ -101,6 +102,24 @@ export const CollapsibleSectionDemo: React.FC = () => {
         code={`<CollapsibleSection\n  label="Update history"\n  expanded={expanded}\n  onToggle={() => setExpanded(!expanded)}\n>\n  <MyContent />\n</CollapsibleSection>`}
       >
         <CollapsibleSection label="Update history" expanded={expanded2} onToggle={() => setExpanded2((v) => !v)}>
+          <RevealedContent />
+        </CollapsibleSection>
+      </Section>
+
+      <Section
+        title='variant="group-header"'
+        description="A flat, transparent, uppercase category header instead — icon + count on the left, chevron on the right. decky-proton-launch's own game-list status groups, unchanged."
+        code={`<CollapsibleSection\n  variant="group-header"\n  label="Ready"\n  icon={FiCheckCircle}\n  iconColor="#4caf50"\n  count={12}\n  expanded={expanded}\n  onToggle={() => setExpanded(!expanded)}\n>\n  <MyContent />\n</CollapsibleSection>`}
+      >
+        <CollapsibleSection
+          variant="group-header"
+          label="Ready"
+          icon={FaCog}
+          iconColor="#4caf50"
+          count={12}
+          expanded={expanded3}
+          onToggle={() => setExpanded3((v) => !v)}
+        >
           <RevealedContent />
         </CollapsibleSection>
       </Section>

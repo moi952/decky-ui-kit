@@ -30,7 +30,7 @@ const ActionButtonPreview: React.FC<{
 );
 
 const controls: ControlConfig[] = [
-  { key: "variant", label: "variant", type: "select", options: ["success", "error"] },
+  { key: "variant", label: "variant", type: "select", options: ["success", "error", "info"] },
   { key: "title", label: "title", type: "text" },
   { key: "description", label: "description", type: "text" },
   { key: "withAction", label: "with an action (children)", type: "checkbox" },
@@ -103,6 +103,20 @@ export const StatusCardDemo: React.FC = () => (
         description="Check the log for details."
       >
         <ActionButtonPreview onClick={() => {}}>Try again</ActionButtonPreview>
+      </StatusCard>
+    </Section>
+
+    <Section
+      title='variant="info", with a dismiss button'
+      description="Not a finished-state verdict like success/error — a plain announcement/notice instead (e.g. 'check out my other plugins'). There's no first-class dismiss prop: the same children slot that fits an action button fits a dismiss button just as well."
+      code={`<StatusCard\n  variant="info"\n  title="New plugin available!"\n  description="Check out my other Decky plugins."\n>\n  <DialogButton onClick={dismiss}>Got it</DialogButton>\n</StatusCard>`}
+    >
+      <StatusCard
+        variant="info"
+        title="New plugin available!"
+        description="Check out my other Decky plugins."
+      >
+        <ActionButtonPreview onClick={() => {}}>Got it</ActionButtonPreview>
       </StatusCard>
     </Section>
 

@@ -79,13 +79,29 @@ The list's corner radius is read at runtime from the trigger's own computed `bor
 
 ### `CollapsibleSection`
 
-An expand/collapse row built on `Field`, for tucking secondary content (settings, history, details) behind a single toggleable header.
+An expand/collapse row, for tucking secondary content (settings, history, details) behind a single toggleable header. Two looks, picked with `variant`: `"field"` (default) is built on `Field` — native Steam padding/highlight/separator, right for a settings-page-style toggle. `"group-header"` is a flat, transparent, uppercase trigger with an optional icon+count instead — a collapsible category header for a list (e.g. a game list grouped by status), not a settings row.
 
 ```tsx
 import { CollapsibleSection } from "@moi952/decky-ui-kit";
 
 <CollapsibleSection label="Advanced settings" expanded={expanded} onToggle={() => setExpanded(!expanded)}>
   <MySettingsFields />
+</CollapsibleSection>
+```
+
+```tsx
+import { FiCheckCircle } from "react-icons/fi";
+
+<CollapsibleSection
+  variant="group-header"
+  label="Ready"
+  icon={FiCheckCircle}
+  iconColor="#4caf50"
+  count={12}
+  expanded={expanded}
+  onToggle={() => setExpanded(!expanded)}
+>
+  {games.map((g) => <GameRow key={g.id} game={g} />)}
 </CollapsibleSection>
 ```
 
@@ -98,6 +114,11 @@ import { CollapsibleSection } from "@moi952/decky-ui-kit";
 | `expanded` | `boolean` | — | Whether the children are shown. State is owned by the caller. |
 | `onToggle` | `() => void` | — | Called on click/activate; flip `expanded` in response. |
 | `children` | `ReactNode` | — | Rendered below the header while `expanded` is `true`. |
+| `variant` | `"field" \| "group-header"` | `"field"` | `"field"`: native `Field`-based row. `"group-header"`: flat, transparent, uppercase trigger with an optional icon+count — a fixed look, no color/size props of its own. |
+| `contentBottomSeparator` | `boolean` | `false` | `"field"` variant only. A second separator drawn after the expanded content, mirroring the one `Field`'s own `bottomSeparator` already draws before it. |
+| `icon` | `IconType` | — | `"group-header"` variant only. An icon (from `react-icons`) shown before the label. |
+| `iconColor` | `string` | `"#888"` | `"group-header"` variant only. Color for `icon`. |
+| `count` | `number` | — | `"group-header"` variant only. A small counter shown after the label (e.g. how many items are in this group). Omitted entirely when not passed. |
 
 </details>
 
@@ -298,6 +319,10 @@ import { QrCodeButton } from "@moi952/decky-ui-kit";
 | `label` | `ReactNode` | — | Collapsible section header text. |
 | `hint` | `ReactNode` | — | Shown under the code once revealed. |
 | `qrSize` | `number` | `160` | QR code size in pixels. |
+| `borderOnFocus` | `boolean` | `true` | A real border on focus/hover — same convention as `MediaRow`'s own `borderOnFocus`. |
+| `highlightColor` | `string` | `"#2a3a4a"` | Border color on focus/hover (used when `borderOnFocus`). Darker than `MediaRow`'s own default (`"#dcdedf"`, invisible against this component's white QR panel), but the same shared `DEFAULT_HIGHLIGHT_BACKGROUND` constant used elsewhere in this library — not an arbitrary one-off color. |
+| `highlightOnFocus` | `boolean` | `false` | A background tint on focus/hover, independent of `borderOnFocus` above. Off by default here (unlike `MediaRow`'s own `true`): the panel is deliberately white to keep the QR code scannable, and the shared default tint would wash out over it. |
+| `highlightBackground` | `string` | `"#2a3a4a"` | Background color on focus/hover (used when `highlightOnFocus`). |
 
 </details>
 
@@ -327,3 +352,45 @@ import { ScreenshotCarousel } from "@moi952/decky-ui-kit";
 | `nextActionDescription` | `ReactNode` | `"Next"` | Shown next to the RB prompt. |
 
 </details>
+
+### `StatusCard`
+
+A finished-state card — "done, here's what happened" — for after an update/install/check completes. `variant="info"` is the odd one out: not a finished-state verdict, a plain announcement/notice instead (e.g. "check out my other plugins"), same card look, neutral blue. Colors and layout match the hand-rolled success/error/notice cards several Decky plugins had already converged on independently. No first-class dismiss-button prop — the same `children` slot that already fits a "Reboot now"/"Try again" action fits a dismiss button just as well (render one, e.g. `ActionButton`, straight into `children`).
+
+```tsx
+import { StatusCard } from "@moi952/decky-ui-kit";
+
+<StatusCard title="Everything is up to date" />
+```
+
+<details>
+<summary>Props</summary>
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `variant` | `"success" \| "error" \| "info"` | `"success"` | Icon/text/border color. |
+| `title` | `ReactNode` | — | Bold headline. |
+| `description` | `ReactNode` | — | Smaller text below the title. |
+| `icon` | `ReactNode` | A check/X/info circle matching `variant` | Overrides the default icon. |
+| `children` | `ReactNode` | — | Rendered below the description — e.g. a "Reboot now"/"Try again"/"Got it" action or dismiss button. |
+
+</details>
+
+## Hooks
+
+### `useRemoteJson`
+
+Fetches and JSON-parses a URL once, keeping the result in memory for a TTL (default 12h) so every component calling this with the same URL during that window reuses the same result instead of re-fetching. Never throws into the caller — a failed fetch (offline, CDN hiccup, ...) just leaves `data` null and `error` true.
+
+```tsx
+import { useRemoteJson } from "@moi952/decky-ui-kit";
+
+const { data, loading, error } = useRemoteJson<MyType>("https://cdn.jsdelivr.net/gh/user/repo@main/data.json");
+```
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| `url` | `string` | — | Fetched with a plain `fetch(url).then(r => r.json())` — same-origin/CORS rules apply like any other `fetch` call. |
+| `ttlMs` | `number` | `43200000` (12h) | How long a successful result is reused before the next mount re-fetches. |
+
+Returns `{ data: T \| null, loading: boolean, error: boolean }`.

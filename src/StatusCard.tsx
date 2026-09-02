@@ -1,9 +1,10 @@
 import React from "react";
 import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import { FiInfo } from "react-icons/fi";
 import { DEFAULT_ROUNDNESS } from "./internal/theme";
 
 export interface StatusCardProps {
-  variant?: "success" | "error";
+  variant?: "success" | "error" | "info";
   title: React.ReactNode;
   description?: React.ReactNode;
   icon?: React.ReactNode;
@@ -21,13 +22,31 @@ const VARIANT_COLORS = {
     bg: "rgba(255, 107, 107, 0.12)",
     border: "rgba(255, 107, 107, 0.35)",
   },
+  // Not a finished-state ("done, here's what happened") like the other
+  // two — for a plain announcement/notice instead (e.g. "check out my
+  // other plugins"), same card look, neutral blue instead of a verdict.
+  info: {
+    fg: "#4b9cf7",
+    bg: "rgba(75, 156, 247, 0.12)",
+    border: "rgba(75, 156, 247, 0.35)",
+  },
+};
+
+const DEFAULT_ICON = {
+  success: <FaCheckCircle />,
+  error: <FaTimesCircle />,
+  info: <FiInfo />,
 };
 
 // A finished-state card — "done, here's what happened" — for after an
-// update/install/check completes. Colors and layout match the
-// hand-rolled success/error cards several Decky plugins (e.g.
-// decky-nvidia-update) already converged on independently; this gives
-// that same look as one reusable component instead of copy-pasted CSS.
+// update/install/check completes (or, with variant="info", a plain
+// announcement/notice instead). Colors and layout match the hand-rolled
+// success/error cards several Decky plugins (e.g. decky-nvidia-update)
+// already converged on independently; this gives that same look as one
+// reusable component instead of copy-pasted CSS. There's no first-class
+// dismiss-button prop — the same `children` slot that already fits a
+// "Reboot now"/"Try again" action fits a dismiss button just as well
+// (render one, e.g. `ActionButton`, straight into `children`).
 export const StatusCard: React.FC<StatusCardProps> = ({
   variant = "success",
   title,
@@ -50,7 +69,7 @@ export const StatusCard: React.FC<StatusCardProps> = ({
       }}
     >
       <div style={{ fontSize: 42, color: colors.fg, marginBottom: 8 }}>
-        {icon ?? (variant === "success" ? <FaCheckCircle /> : <FaTimesCircle />)}
+        {icon ?? DEFAULT_ICON[variant]}
       </div>
       <div
         style={{

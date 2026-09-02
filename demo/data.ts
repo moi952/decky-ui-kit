@@ -58,7 +58,7 @@ export const COMPONENTS = [
   {
     id: "collapsible-section",
     label: "CollapsibleSection",
-    examples: ["expanded (default)", "collapsed (default)"],
+    examples: ["expanded (default)", "collapsed (default)", 'variant="group-header"'],
   },
   {
     id: "field-text-input",
@@ -118,6 +118,7 @@ export const COMPONENTS = [
     examples: [
       "success, with an action",
       'variant="error"',
+      'variant="info", with a dismiss button',
       "title only, no description or children",
     ],
   },
