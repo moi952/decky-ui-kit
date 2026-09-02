@@ -95,10 +95,17 @@ export const COMPONENTS = [
     label: "MediaRow",
     examples: [
       "status-stack app row, collapsed until pressed",
+      "mediaAlign with a 2-line title",
+      'mediaAlign with mediaLayout="stretch"',
       "cover-image capsule, no actions row",
       'color="success" ("now playing")',
       "every color, side by side",
     ],
+  },
+  {
+    id: "qr-code-button",
+    label: "QrCodeButton",
+    examples: ["reveal on expand"],
   },
   {
     id: "screenshot-carousel",

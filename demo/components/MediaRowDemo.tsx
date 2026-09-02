@@ -70,7 +70,9 @@ const controls: ControlConfig[] = [
   { key: "collapsedByDefault", label: "collapsedByDefault", type: "checkbox", showIf: (v) => v.layout === "status-stack" && v.withActions },
   { key: "hasUpdate", label: "has an available update (status-stack only)", type: "checkbox", showIf: (v) => v.layout === "status-stack" },
   { key: "mediaWidth", label: "mediaWidth (fixed layout only)", type: "number", min: 8, showIf: (v) => v.layout === "status-stack" },
+  { key: "mediaAlign", label: "mediaAlign", type: "select", options: ["top", "center", "bottom"] },
   { key: "mediaHeight", label: "mediaHeight", type: "number", min: 8 },
+  { key: "title", label: "title", type: "text" },
   { key: "titleLines", label: "titleLines", type: "number", min: 1 },
   { key: "color", label: "color", type: "select", options: ["light", "dark", "transparent", "success", "danger", "info", "warning"] },
   { key: "accentBorderColor", label: "accentBorderColor", type: "color" },
@@ -94,7 +96,9 @@ const initialValues = {
   collapsedByDefault: true,
   hasUpdate: true,
   mediaWidth: 32,
+  mediaAlign: "center",
   mediaHeight: 32,
+  title: "Firefox",
   titleLines: 1,
   color: "light",
   accentBorderColor: "#4caf50",
@@ -136,8 +140,9 @@ const genCode = (values: Record<string, any>) => {
       `<MediaRow`,
       `  mediaLayout="stretch"`,
       `  mediaHeight={${values.mediaHeight}}`,
+      ...(values.mediaAlign !== "center" ? [`  mediaAlign="${values.mediaAlign}"`] : []),
       `  media={<img style={{ height: "100%", width: "auto" }} .../>}`,
-      `  title="Half-Life 2"`,
+      `  title="${values.title}"`,
       `  titleLines={${values.titleLines}}`,
       `  onPress={launch}`,
       ...sharedProps,
@@ -148,8 +153,9 @@ const genCode = (values: Record<string, any>) => {
     `<MediaRow`,
     `  media={<img src={iconUrl} .../>}`,
     `  mediaWidth={${values.mediaWidth}}`,
+    ...(values.mediaAlign !== "center" ? [`  mediaAlign="${values.mediaAlign}"`] : []),
     `  mediaHeight={${values.mediaHeight}}`,
-    `  title="Firefox"`,
+    `  title="${values.title}"`,
     `  titleLines={${values.titleLines}}`,
     `  details={<div>128.0${values.hasUpdate ? "\\n129.0 available" : ""}</div>}`,
   ];
@@ -199,8 +205,9 @@ export const MediaRowDemo: React.FC = () => {
                     {...shared}
                     mediaLayout="stretch"
                     mediaHeight={values.mediaHeight}
+                    mediaAlign={values.mediaAlign}
                     media={<CoverPlaceholder from={values.mediaColor} to="#1a1a2e" />}
-                    title={<span style={{ fontSize: 11, fontWeight: "normal" }}>Half-Life 2</span>}
+                    title={<span style={{ fontSize: 11, fontWeight: "normal" }}>{values.title}</span>}
                     titleLines={values.titleLines}
                     onPress={() => {}}
                   />
@@ -209,8 +216,9 @@ export const MediaRowDemo: React.FC = () => {
                     {...shared}
                     media={<IconPlaceholder color={values.mediaColor} />}
                     mediaWidth={values.mediaWidth}
+                    mediaAlign={values.mediaAlign}
                     mediaHeight={values.mediaHeight}
-                    title="Firefox"
+                    title={values.title}
                     titleLines={values.titleLines}
                     details={
                       <>
@@ -272,6 +280,49 @@ export const MediaRowDemo: React.FC = () => {
             </>
           }
         />
+      </Section>
+
+      <Section
+        title="mediaAlign with a long, wrapped title"
+        description={'Once `title` wraps past one line, the row grows taller than `mediaHeight` — both mediaLayout values fix the media box\'s own height rather than stretching it, so without this the box just sits at the browser\'s flex default (top). This picks where it sits instead — the effect is easiest to see with several wrapped lines, like below.'}
+        code={`<MediaRow\n  media={<img src={iconUrl} .../>}\n  title="A pretty long app name that ends up wrapping across several lines like this one"\n  titleLines={4}\n  mediaAlign="top"\n  details={<div>128.0</div>}\n/>`}
+      >
+        {(["top", "center", "bottom"] as const).map((align) => (
+          <MediaRow
+            key={align}
+            color="light"
+            spacing={4}
+            media={<IconPlaceholder color="#e67e22" />}
+            title={`mediaAlign="${align}" — a pretty long app name that ends up wrapping across several lines like this one`}
+            titleLines={4}
+            mediaAlign={align}
+          />
+        ))}
+      </Section>
+
+      <Section
+        title={'mediaAlign with mediaLayout="stretch"'}
+        description="Same fix, cover-image capsules — a game with a long title that wraps across several lines no longer pins the cover to the top."
+        code={`<MediaRow\n  mediaLayout="stretch"\n  mediaHeight={37}\n  media={<img style={{ height: "100%", width: "auto" }} .../>}\n  title="A pretty long game title that ends up wrapping across several lines like this one"\n  titleLines={4}\n  mediaAlign="center"\n  onPress={launch}\n/>`}
+      >
+        {(["top", "center", "bottom"] as const).map((align) => (
+          <MediaRow
+            key={align}
+            mediaLayout="stretch"
+            mediaHeight={37}
+            spacing={4}
+            color="light"
+            media={<CoverPlaceholder from="#2b6cb0" to="#1a2a4d" />}
+            title={
+              <span style={{ fontSize: 11, fontWeight: "normal" }}>
+                {`mediaAlign="${align}" — a pretty long game title that ends up wrapping across several lines like this one`}
+              </span>
+            }
+            titleLines={4}
+            onPress={() => {}}
+            mediaAlign={align}
+          />
+        ))}
       </Section>
 
       <Section

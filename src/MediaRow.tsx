@@ -30,6 +30,12 @@ export interface MediaRowProps {
   // shows in full, never cropped to fit a guessed box width.
   mediaLayout?: "fixed" | "stretch";
   mediaHeight?: number;
+  // Both layouts fix the media box's own height (mediaHeight) rather than
+  // stretching it — "stretch" only means "no fixed width", not "no fixed
+  // height" — so once `title` wraps past one line (titleLines > 1) and
+  // the row grows taller than mediaHeight, this decides where that box
+  // sits in the extra space instead of the browser's flex default (top).
+  mediaAlign?: "top" | "center" | "bottom";
 
   title: React.ReactNode;
   // 1 (default): single line, ellipsis-truncated. >1: line-clamped over
@@ -93,6 +99,12 @@ export interface MediaRowProps {
   onSecondaryActionDescription?: React.ReactNode;
 }
 
+const MEDIA_ALIGN = {
+  top: "flex-start",
+  center: "center",
+  bottom: "flex-end",
+} as const;
+
 const COLOR_STYLES = {
   // The plain default look — reserves the same border width as every
   // accented color below (an invisible border, not an absent one) so a
@@ -121,6 +133,15 @@ export const MediaRow: React.FC<MediaRowProps> = ({
   mediaWidth = 32,
   mediaLayout = "fixed",
   mediaHeight = 32,
+  // Layout-dependent default, not a flat "center" for both — a flex item
+  // with a definite cross-size (mediaBox always has one: mediaHeight)
+  // renders at the container's cross-axis start when align-items can't
+  // actually stretch it, which is what "stretch" always used before this
+  // prop existed. Defaulting it to "center" for both would have silently
+  // changed every existing mediaLayout="stretch" caller's look (e.g.
+  // decky-proton-launch's own GameRow cover art) the moment they upgraded
+  // — this keeps that exact prior look until a caller opts in.
+  mediaAlign = mediaLayout === "stretch" ? "top" : "center",
   title,
   titleLines = 1,
   details,
@@ -196,6 +217,12 @@ export const MediaRow: React.FC<MediaRowProps> = ({
     <div
       style={{
         fontSize: 13,
+        // Steam's own default line-height runs noticeably taller than this
+        // font actually needs — harmless for a single line, but it's what
+        // pushes a 2+ line title past mediaHeight in the first place
+        // (mediaAlign, above, only ever manages the leftover once that
+        // happens; this cuts down how much leftover there is to manage).
+        lineHeight: 1.2,
         fontWeight: 600,
         color: "#fff",
         ...(titleLines > 1
@@ -225,6 +252,7 @@ export const MediaRow: React.FC<MediaRowProps> = ({
               height: mediaHeight,
               flexShrink: 0,
               overflow: "hidden",
+              alignSelf: MEDIA_ALIGN[mediaAlign],
             }
           : {
               width: mediaWidth,
@@ -233,6 +261,7 @@ export const MediaRow: React.FC<MediaRowProps> = ({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              alignSelf: MEDIA_ALIGN[mediaAlign],
             }
       }
     >

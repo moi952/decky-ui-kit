@@ -43,5 +43,8 @@
     "steam-deck",
     "ui",
     "dropdown"
-  ]
+  ],
+  "dependencies": {
+    "qrcode.react": "^4.2.0"
+  }
 }

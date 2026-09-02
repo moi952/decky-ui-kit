@@ -12,6 +12,8 @@ export { InlineConfirm } from "./InlineConfirm";
 export type { InlineConfirmProps } from "./InlineConfirm";
 export { MediaRow } from "./MediaRow";
 export type { MediaRowProps } from "./MediaRow";
+export { QrCodeButton } from "./QrCodeButton";
+export type { QrCodeButtonProps } from "./QrCodeButton";
 export { ScreenshotCarousel } from "./ScreenshotCarousel";
 export type { ScreenshotCarouselProps } from "./ScreenshotCarousel";
 export { StatusCard } from "./StatusCard";

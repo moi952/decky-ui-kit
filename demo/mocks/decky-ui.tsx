@@ -391,6 +391,12 @@ export const ModalRoot: React.FC<ModalRootProps> = ({ children, closeModal, onCa
   );
 };
 
+// Real Navigation.NavigateToExternalWeb opens Steam's own browser overlay
+// — plain window.open is the closest browser-demo equivalent.
+export const Navigation = {
+  NavigateToExternalWeb: (url: string) => window.open(url, "_blank", "noopener,noreferrer"),
+};
+
 export interface ShowModalResult {
   Close: () => void;
   Update: (modal: React.ReactNode) => void;

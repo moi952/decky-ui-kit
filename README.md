@@ -56,7 +56,7 @@ import { AnchoredDropdown } from "@moi952/decky-ui-kit";
 | `onChange` | `(value: string) => void` | — | Called with the new value (or comma-joined list, in `multiple` mode). |
 | `variant` | `"row" \| "boxed"` | `"boxed"` | `"row"`: flat, matches surrounding list rows. `"boxed"`: bordered box with an arrow. |
 | `focusStyle` | `"fill" \| "outline"` | `"fill"` | `"fill"`: solid white background on focus. `"outline"`: transparent border that fills on focus. |
-| `size` | `"default" \| "small"` | `"default"` | Row/trigger height and font size. |
+| `size` | `"small" \| "medium" \| "large"` | `"small"` | Row/trigger height and font size — same scale as `ActionButton`/`FieldTextInput`. |
 | `bgColor` | `string` | Steam-like dark gray | Background color. |
 | `textColor` | `string` | Steam-like light gray | Text color. |
 | `borderColor` | `string` | `"transparent"` | Trigger and list border color. |
@@ -94,7 +94,7 @@ import { CollapsibleSection } from "@moi952/decky-ui-kit";
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `label` | `string` | — | Header text. |
+| `label` | `ReactNode` | — | Header text. |
 | `expanded` | `boolean` | — | Whether the children are shown. State is owned by the caller. |
 | `onToggle` | `() => void` | — | Called on click/activate; flip `expanded` in response. |
 | `children` | `ReactNode` | — | Rendered below the header while `expanded` is `true`. |
@@ -119,7 +119,7 @@ import { FieldTextInput } from "@moi952/decky-ui-kit";
 | `value` | `string` | — | Current value. |
 | `onChange` | `(value: string) => void` | — | Called with the new value on every keystroke. |
 | `label` | `ReactNode` | — | Label text/content. |
-| `size` | `"default" \| "small"` | `"default"` | Input font size and padding. |
+| `size` | `"small" \| "medium" \| "large"` | `"medium"` | Input font size and padding — same scale as `ActionButton`/`AnchoredDropdown`. |
 | `labelPosition` | `"top" \| "left" \| "right"` | `"top"` | Where the label sits relative to the input. |
 | `mustBeNumeric` | `boolean` | `false` | Restricts input to numeric characters. |
 | `bottomSeparator` | `boolean` | `true` | Native Steam separator line below the row. |
@@ -253,6 +253,7 @@ import { FiEyeOff } from "react-icons/fi";
 | `mediaWidth` | `number` | `32` | Media box width — only used by `mediaLayout="fixed"`. |
 | `mediaHeight` | `number` | `32` | Media box height. |
 | `mediaLayout` | `"fixed" \| "stretch"` | `"fixed"` | `"fixed"`: media centered in an exact `mediaWidth`×`mediaHeight` box (a small icon). `"stretch"`: exactly `mediaHeight` tall, but no fixed width at all — the media renders at whatever width its own aspect ratio calls for at that height (e.g. `<img style={{ height: "100%", width: "auto" }} />`), so a cover image always shows in full. |
+| `mediaAlign` | `"top" \| "center" \| "bottom"` | `"center"` for `mediaLayout="fixed"`, `"top"` for `"stretch"` | Where the fixed-height media box sits once `titleLines > 1` makes the row taller than `mediaHeight`. The default matches each layout's own prior look exactly (before this prop existed), so it's opt-in, not a behavior change. |
 | `title` | `ReactNode` | — | The row's title. |
 | `titleLines` | `number` | `1` | `1`: ellipsis-truncated single line. `>1`: line-clamped over that many lines. |
 | `details` | `ReactNode` | — | Extra content under the title — your own pre-colored status line(s). Omit for a title-only row. |
@@ -271,6 +272,32 @@ import { FiEyeOff } from "react-icons/fi";
 | `bottomSeparator` | `boolean` | `false` | A bottom divider line, for a continuous divided list — the alternative to `spacing`. Pair with `color="transparent"` so the row shows no card background of its own, just the divider and the focus highlight. |
 | `onSecondaryButton` | `(evt) => void` | — | Fires on gamepad X / Steam "Secondary" while the row has focus. |
 | `onSecondaryActionDescription` | `ReactNode` | — | Shown in Steam's own bottom action-legend bar next to the X prompt (only while `onSecondaryButton` is set). |
+
+</details>
+
+### `QrCodeButton`
+
+A collapsible section (built on `CollapsibleSection`) that reveals a QR code on expand — for handing a URL off to the user's phone (a feedback form, a release page, ...) instead of them typing it on a gamepad. The revealed code is itself a real gamepad-focusable button — pressing it opens the URL directly in Steam's own browser overlay, for anyone who'd rather not reach for their phone.
+
+```tsx
+import { QrCodeButton } from "@moi952/decky-ui-kit";
+
+<QrCodeButton
+  value="https://github.com/moi952/decky-proton-launch/issues"
+  label="Suggest a feature"
+  hint="Scan with your phone"
+/>
+```
+
+<details>
+<summary>Props</summary>
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `string` | — | The URL (or any text) encoded into the QR code. |
+| `label` | `ReactNode` | — | Collapsible section header text. |
+| `hint` | `ReactNode` | — | Shown under the code once revealed. |
+| `qrSize` | `number` | `160` | QR code size in pixels. |
 
 </details>
 

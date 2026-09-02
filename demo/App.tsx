@@ -10,6 +10,7 @@ import { FieldTextInputDemo } from "./components/FieldTextInputDemo";
 import { InfoTableDemo } from "./components/InfoTableDemo";
 import { InlineConfirmDemo } from "./components/InlineConfirmDemo";
 import { MediaRowDemo } from "./components/MediaRowDemo";
+import { QrCodeButtonDemo } from "./components/QrCodeButtonDemo";
 import { ScreenshotCarouselDemo } from "./components/ScreenshotCarouselDemo";
 import { StatusCardDemo } from "./components/StatusCardDemo";
 import { VersionSwitcher } from "./components/VersionSwitcher";
@@ -319,6 +320,7 @@ const App: React.FC = () => {
             {active === "info-table" && <InfoTableDemo />}
             {active === "inline-confirm" && <InlineConfirmDemo />}
             {active === "media-row" && <MediaRowDemo />}
+            {active === "qr-code-button" && <QrCodeButtonDemo />}
             {active === "screenshot-carousel" && <ScreenshotCarouselDemo />}
             {active === "status-card" && <StatusCardDemo />}
           </div>
