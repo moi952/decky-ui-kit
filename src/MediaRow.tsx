@@ -97,6 +97,14 @@ export interface MediaRowProps {
 
   onSecondaryButton?: (evt: GamepadEvent) => void;
   onSecondaryActionDescription?: React.ReactNode;
+  // Y BUTTON — a second, independent gamepad shortcut alongside
+  // onSecondaryButton's X, for a row offering two distinct quick actions
+  // (e.g. "X to remove" / "Y to hide") without needing to expand its
+  // actions row at all.
+  onOptionsButton?: (evt: GamepadEvent) => void;
+  onOptionsActionDescription?: React.ReactNode;
+  // Steam's own footer hint for the row's main action (A button/press).
+  onOKActionDescription?: React.ReactNode;
 }
 
 const MEDIA_ALIGN = {
@@ -160,6 +168,9 @@ export const MediaRow: React.FC<MediaRowProps> = ({
   bottomSeparator = false,
   onSecondaryButton,
   onSecondaryActionDescription,
+  onOptionsButton,
+  onOptionsActionDescription,
+  onOKActionDescription,
 }) => {
   const { cls, styleTag } = useFocusHighlightClass("dck-media-row", {
     highlightOnFocus,
@@ -301,6 +312,9 @@ export const MediaRow: React.FC<MediaRowProps> = ({
           onClick={handleClick}
           onSecondaryButton={onSecondaryButton}
           onSecondaryActionDescription={onSecondaryActionDescription}
+          onOptionsButton={onOptionsButton}
+          onOptionsActionDescription={onOptionsActionDescription}
+          onOKActionDescription={onOKActionDescription}
           style={{
             ...cardStyle,
             width: "100%",
@@ -328,6 +342,9 @@ export const MediaRow: React.FC<MediaRowProps> = ({
           onClick={handleClick}
           onSecondaryButton={onSecondaryButton}
           onSecondaryActionDescription={onSecondaryActionDescription}
+          onOptionsButton={onOptionsButton}
+          onOptionsActionDescription={onOptionsActionDescription}
+          onOKActionDescription={onOKActionDescription}
           style={{
             width: "100%",
             boxSizing: "border-box",

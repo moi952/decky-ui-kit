@@ -8,17 +8,19 @@ export interface ActionButtonProps {
   children: React.ReactNode;
   onClick: () => void;
   size?: ComponentSize;
-  // "normal": the native DialogButton, untouched — no color/border/radius
-  // override of any kind, so it keeps whatever Steam's own chrome (and a
-  // CSSLoader theme, for radius) already gives it.
-  // "bordered": a translucent gray card look, for a plain secondary
-  // action next to something more important.
-  // "danger": red, for a destructive action.
-  // "primary": blue (the same ACCENT_INFO InlineConfirm's own
-  // variant="primary" already uses) — a non-destructive confirm.
+  // "normal": untouched native button. "bordered": translucent gray
+  // card. "danger": red. "primary": blue (ACCENT_INFO).
   variant?: "normal" | "bordered" | "danger" | "primary";
+  // Toggle state, e.g. a filter chip that's currently on — its own
+  // color per variant, always distinct from that variant's own focus.
+  pressed?: boolean;
   width?: string | number;
   disabled?: boolean;
+  // Steam's own navigation hint for "focus this one first" when entering
+  // a newly-revealed group of focusables (e.g. MediaRow's actions row
+  // right after it expands) — without it, which button ends up focused
+  // is whatever the navigation system falls back to on its own.
+  preferredFocus?: boolean;
 
   // X BUTTON
   onSecondaryButton?: (evt: GamepadEvt) => void;
@@ -34,11 +36,6 @@ export interface ActionButtonProps {
   onOKActionDescription?: React.ReactNode;
 }
 
-// Padding only — vertical rhythm (fontSize/minHeight) comes from the
-// shared SIZE_STYLE table instead, the same one FieldTextInput and
-// AnchoredDropdown's own trigger use, so all three actually line up
-// instead of each deriving a close-but-not-guaranteed height from their
-// own padding+font independently.
 const PADDING_V = { small: 4, medium: 6, large: 8 } as const;
 const PADDING_H = { small: 8, medium: 12, large: 16 } as const;
 
@@ -47,18 +44,24 @@ const SOLID_VARIANT_COLOR = {
   primary: ACCENT_INFO,
 } as const;
 
-// Never sets its own border-radius, for any variant — Steam's own native
-// DialogButton chrome already gives every button a sensible radius on
-// its own (a CSSLoader "round corners" theme controls it same as
-// anywhere else), so there's nothing for this component to add or
-// override there.
+// Resting-state color only — pressed's own focus/hover is the same
+// plain white every other button uses (see below).
+const PRESSED_COLOR = {
+  normal: "#4a4f57",
+  bordered: "#4a4f57",
+  primary: "#2f6db8",
+  danger: "#a83333",
+} as const;
+
 export const ActionButton: React.FC<ActionButtonProps> = ({
   children,
   onClick,
   size = "small",
   variant = "normal",
+  pressed,
   width,
   disabled,
+  preferredFocus,
   onSecondaryButton,
   onSecondaryActionDescription,
   onOptionsButton,
@@ -68,22 +71,23 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
   onOKButton,
   onOKActionDescription,
 }) => {
+  const isPressed = pressed === true;
   const { fontSize, minHeight } = SIZE_STYLE[size];
   const style: React.CSSProperties = {
     padding: `${PADDING_V[size]}px ${PADDING_H[size]}px`,
     fontSize,
     minHeight,
-    // Reserved for every variant that gets a background override below
-    // (bordered/danger/primary) — even the ones with no visible border
-    // of their own (danger/primary) still occupy the same 1px of
-    // box-model space "bordered" uses for its own real one, so all
-    // three add up to the exact same height instead of "bordered" alone
-    // needing 2px more room than the others at the same size. "normal"
-    // stays fully untouched, per its own documented promise above — no
-    // override at all, not even an invisible one.
-    ...(variant !== "normal" ? { border: "1px solid transparent" } : {}),
+    // No border, ever — a box-shadow (below) draws the visible ring
+    // instead, since a border would resize the button whenever it
+    // appears (no fixed width here, buttons size to their content).
   };
-  const cls = variant !== "normal" ? `dck-action-btn-${variant}` : undefined;
+  const cls =
+    [variant !== "normal" ? `dck-action-btn-${variant}` : null, isPressed ? `dck-action-btn-pressed-${variant}` : null]
+      .filter(Boolean)
+      .join(" ") || undefined;
+  // Compound selector so the pressed rule reliably outranks the plain
+  // variant rule regardless of style-tag mount order.
+  const pressedVariantCls = variant !== "normal" ? `.dck-action-btn-${variant}` : "";
 
   return (
     <>
@@ -91,19 +95,19 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
         <style>{`
           .dck-action-btn-bordered {
             background: rgba(255, 255, 255, 0.08) !important;
-            border-color: rgba(255, 255, 255, 0.18) !important;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18) !important;
           }
           .dck-action-btn-bordered:focus,
           .dck-action-btn-bordered:hover {
             background: #dcdedf !important;
             color: #000 !important;
-            border-color: #dcdedf !important;
+            box-shadow: inset 0 0 0 1px #dcdedf !important;
           }
           .dck-action-btn-bordered:disabled,
           .dck-action-btn-bordered[disabled] {
             opacity: 1 !important;
             background: #2a2e35 !important;
-            border-color: rgba(255, 255, 255, 0.15) !important;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15) !important;
             color: #6b7076 !important;
           }
         `}</style>
@@ -118,6 +122,21 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
           .dck-action-btn-${variant}:hover {
             background-color: #fff !important;
             color: ${SOLID_VARIANT_COLOR[variant]} !important;
+          }
+        `}</style>
+      )}
+      {isPressed && (
+        <style>{`
+          .dck-action-btn-pressed-${variant}${pressedVariantCls ? `, ${pressedVariantCls}.dck-action-btn-pressed-${variant}` : ""} {
+            background-color: ${PRESSED_COLOR[variant]} !important;
+            color: #fff !important;
+          }
+          .dck-action-btn-pressed-${variant}:focus,
+          .dck-action-btn-pressed-${variant}:hover${pressedVariantCls ? `,
+          ${pressedVariantCls}.dck-action-btn-pressed-${variant}:focus,
+          ${pressedVariantCls}.dck-action-btn-pressed-${variant}:hover` : ""} {
+            background-color: #fff !important;
+            color: #111 !important;
           }
         `}</style>
       )}
@@ -137,6 +156,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
         }}
         onClick={onClick}
         disabled={disabled}
+        preferredFocus={preferredFocus}
         onSecondaryButton={onSecondaryButton}
         onSecondaryActionDescription={onSecondaryActionDescription}
         onOptionsButton={onOptionsButton}

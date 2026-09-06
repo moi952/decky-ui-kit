@@ -60,8 +60,8 @@ const InfoTableRowView: React.FC<
         color: accent ?? valueColor,
         marginLeft: "auto",
         textAlign: "right",
+        // No wordBreak: break-all — it split ordinary words mid-word.
         overflowWrap: "anywhere",
-        wordBreak: "break-all",
       }}
     >
       {value}

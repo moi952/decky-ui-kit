@@ -58,6 +58,11 @@ export const InlineConfirm: React.FC<InlineConfirmProps> = ({
           background-color: #fff !important;
           color: #1a1a1a !important;
         }
+        .${cancelCls}:focus,
+        .${cancelCls}:hover {
+          background-color: #b8bcbf !important;
+          color: #1a1a1a !important;
+        }
       `}</style>
       <span style={{ fontSize: 11, color: "#aaa" }}>{description}</span>
       <Focusable style={{ display: "flex", gap: 8, width: "100%" }} flow-children="horizontal">

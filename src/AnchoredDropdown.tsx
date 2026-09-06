@@ -24,6 +24,8 @@ export interface AnchoredDropdownProps {
   // already applies, on top of Field's — see this same lesson already
   // learned for SearchField/FieldTextInput).
   label?: React.ReactNode;
+  // Overrides the label's own font size.
+  labelFontSize?: number;
   // "row": flat, matches surrounding rows. "boxed": bordered box + arrow.
   variant?: "row" | "boxed";
   // "fill": solid white on focus. "outline": transparent-border look.
@@ -55,6 +57,8 @@ export interface AnchoredDropdownProps {
   highlightOnFocus?: boolean;
   // Native Steam separator line below the trigger.
   bottomSeparator?: boolean;
+  // Overrides the selected-value text's own font size, independent of `size`.
+  valueFontSize?: number;
 }
 
 const DEFAULT_BG = DEFAULT_PANEL_BACKGROUND;
@@ -106,6 +110,7 @@ export const AnchoredDropdown: React.FC<AnchoredDropdownProps> = ({
   selectedValue,
   onChange,
   label,
+  labelFontSize,
   variant = "boxed",
   focusStyle = "fill",
   size = "medium",
@@ -124,6 +129,7 @@ export const AnchoredDropdown: React.FC<AnchoredDropdownProps> = ({
   maxVisibleOptions,
   highlightOnFocus = true,
   bottomSeparator = true,
+  valueFontSize,
 }) => {
   // Scoped per instance so sibling dropdowns don't share class names.
   const [uid] = useState(() => `dck-anchored-dd${uidCounter++}`);
@@ -252,7 +258,8 @@ export const AnchoredDropdown: React.FC<AnchoredDropdownProps> = ({
   const optionPadding = OPTION_PADDING[size];
   const optionFontSize = OPTION_FONT_SIZE[size];
   const triggerPadding = `${TRIGGER_PADDING_V[size]}px ${TRIGGER_PADDING_H[size]}px`;
-  const { fontSize: triggerFontSize, minHeight: triggerMinHeight } = SIZE_STYLE[size];
+  const { fontSize: sizeFontSize, minHeight: triggerMinHeight } = SIZE_STYLE[size];
+  const triggerFontSize = valueFontSize ?? sizeFontSize;
 
   return (
     <div
@@ -285,7 +292,7 @@ export const AnchoredDropdown: React.FC<AnchoredDropdownProps> = ({
           align-items: center !important;
           gap: 8px !important;
           padding: ${triggerPadding} !important;
-          font-size: ${triggerFontSize} !important;
+          font-size: ${triggerFontSize}px !important;
           min-height: ${triggerMinHeight}px !important;
           background: ${bgColor} !important;
           border: 1px solid ${borderColor} !important;
@@ -353,6 +360,12 @@ export const AnchoredDropdown: React.FC<AnchoredDropdownProps> = ({
         }
       `}</style>
       {(() => {
+        const styledLabel =
+          label && labelFontSize !== undefined ? (
+            <span style={{ fontSize: labelFontSize }}>{label}</span>
+          ) : (
+            label
+          );
         const countNode =
           multiple && selectedCountLabel && selectedValues.length > 0 ? (
             <div className={countCls}>{selectedCountLabel(selectedValues.length)}</div>
@@ -362,7 +375,7 @@ export const AnchoredDropdown: React.FC<AnchoredDropdownProps> = ({
           return (
             <Field
               focusable
-              label={label}
+              label={styledLabel}
               // Field's own default isn't "label sits above the
               // control" — explicit here so a caller-supplied label
               // renders on top, the same convention FieldTextInput's own
@@ -413,7 +426,7 @@ export const AnchoredDropdown: React.FC<AnchoredDropdownProps> = ({
             label={
               label || countNode ? (
                 <div style={{ display: "flex", flexDirection: "column", gap: 2, width: "100%" }}>
-                  {label}
+                  {styledLabel}
                   {countNode}
                   {displayLabel}
                 </div>
