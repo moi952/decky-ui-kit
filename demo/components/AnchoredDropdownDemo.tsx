@@ -18,6 +18,7 @@ const controls: ControlConfig[] = [
     min: 0,
     placeholder: "(default)",
   },
+  { key: "twoLineLabels", label: "renderOptionLabel (two lines)", type: "checkbox" },
   { key: "multiple", label: "multiple", type: "checkbox" },
   {
     key: "selectedValuesLayout",
@@ -69,6 +70,7 @@ const initialValues = {
   highlightOnFocus: true,
   maxDisplayLines: 1,
   maxVisibleOptions: undefined,
+  twoLineLabels: false,
   enableSecondaryButton: false,
   onSecondaryActionDescription: "secondary action",
   secondaryPressed: false,
@@ -99,6 +101,9 @@ const genCode = (values: Record<string, any>) => {
   if (!values.highlightOnFocus) props.push(`  highlightOnFocus={false}`);
   if (values.maxDisplayLines !== 1) props.push(`  maxDisplayLines={${values.maxDisplayLines}}`);
   if (values.maxVisibleOptions !== undefined) props.push(`  maxVisibleOptions={${values.maxVisibleOptions}}`);
+  if (values.twoLineLabels) {
+    props.push(`  renderOptionLabel={(o) => (\n    <div>\n      <div>{o.label}</div>\n      <div style={{ fontSize: 11, opacity: 0.7 }}>{o.value}</div>\n    </div>\n  )}`);
+  }
   if (values.enableSecondaryButton) {
     props.push(
       `  onSecondaryButton={() => {}}`,
@@ -136,6 +141,7 @@ export const AnchoredDropdownDemo: React.FC = () => {
   const [v11, setV11] = useState("a,c,e");
   const [v12, setV12] = useState("a");
   const [v13, setV13] = useState("a,c,e");
+  const [v14, setV14] = useState("opt0");
   const [rawMode, setRawMode] = useState(false);
   const [colorMode, setColorMode] = useState(false);
 
@@ -158,6 +164,16 @@ export const AnchoredDropdownDemo: React.FC = () => {
               highlightOnFocus={values.highlightOnFocus}
               maxDisplayLines={values.maxDisplayLines}
               maxVisibleOptions={values.maxVisibleOptions}
+              renderOptionLabel={
+                values.twoLineLabels
+                  ? (o) => (
+                      <div>
+                        <div>{o.label}</div>
+                        <div style={{ fontSize: 11, opacity: 0.7 }}>{o.value}</div>
+                      </div>
+                    )
+                  : undefined
+              }
               selectedCountLabel={
                 values.multiple && values.enableCountLabel
                   ? (n: number) => values.countLabelTemplate.replace("{n}", String(n))
@@ -273,6 +289,25 @@ export const AnchoredDropdownDemo: React.FC = () => {
           options={LONG_OPTIONS}
           selectedValue={v7}
           onChange={setV7}
+        />
+      </Section>
+
+      <Section
+        title="renderOptionLabel"
+        description="Custom option rows (here two lines). The list opens up or down and shrinks to the room available."
+        code={`<AnchoredDropdown\n  maxVisibleOptions={8}\n  renderOptionLabel={(o) => (\n    <div>\n      <div>{o.label}</div>\n      <div style={{ fontSize: 11, opacity: 0.7 }}>{o.value}</div>\n    </div>\n  )}\n  options={options}\n  selectedValue={value}\n  onChange={setValue}\n/>`}
+      >
+        <AnchoredDropdown
+          maxVisibleOptions={8}
+          renderOptionLabel={(o) => (
+            <div>
+              <div>{o.label}</div>
+              <div style={{ fontSize: 11, opacity: 0.7 }}>{o.value}</div>
+            </div>
+          )}
+          options={LONG_OPTIONS}
+          selectedValue={v14}
+          onChange={setV14}
         />
       </Section>
 

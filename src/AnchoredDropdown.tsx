@@ -59,6 +59,7 @@ export interface AnchoredDropdownProps {
   bottomSeparator?: boolean;
   // Overrides the selected-value text's own font size, independent of `size`.
   valueFontSize?: number;
+  renderOptionLabel?: (option: DropdownOption) => React.ReactNode;
 }
 
 const DEFAULT_BG = DEFAULT_PANEL_BACKGROUND;
@@ -130,6 +131,7 @@ export const AnchoredDropdown: React.FC<AnchoredDropdownProps> = ({
   highlightOnFocus = true,
   bottomSeparator = true,
   valueFontSize,
+  renderOptionLabel,
 }) => {
   // Scoped per instance so sibling dropdowns don't share class names.
   const [uid] = useState(() => `dck-anchored-dd${uidCounter++}`);
@@ -139,6 +141,7 @@ export const AnchoredDropdown: React.FC<AnchoredDropdownProps> = ({
   const wrapperRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
   const [openUp, setOpenUp] = useState(false);
+  const [listMaxHeight, setListMaxHeight] = useState<number | undefined>(220);
   // Mirrors the trigger's real computed radius instead of a guessed CSS var.
   const [listRadius, setListRadius] = useState(FALLBACK_RADIUS);
   // CSS-only truncation proved unreliable through Field's layout — measure instead.
@@ -232,21 +235,48 @@ export const AnchoredDropdown: React.FC<AnchoredDropdownProps> = ({
   // Padding + line-height + the option's 2px border.
   const rowHeight = OPTION_ROW_HEIGHT[size];
   // 0 means "show every option, no scroll cap".
-  const listMaxHeight =
-    maxVisibleOptions === 0 ? undefined : maxVisibleOptions ? maxVisibleOptions * (rowHeight + 2) : 220;
+  const requestedHeight =
+    maxVisibleOptions === 0 ? Infinity : maxVisibleOptions ? maxVisibleOptions * (rowHeight + 2) : 220;
 
-  const toggle = () => {
-    setExpanded((prev) => {
-      const next = !prev;
-      if (next && wrapperRef.current) {
-        const r = wrapperRef.current.getBoundingClientRect();
-        const spaceBelow = window.innerHeight - r.bottom;
-        const spaceAbove = r.top;
-        setOpenUp(spaceBelow < (listMaxHeight ?? Infinity) && spaceAbove > spaceBelow);
+  useLayoutEffect(() => {
+    if (!expanded || !wrapperRef.current) return;
+    const wrapper = wrapperRef.current;
+    const view = wrapper.ownerDocument.defaultView;
+    if (!view) return;
+    const measure = () => {
+      const r = wrapper.getBoundingClientRect();
+      const scale = (wrapper.offsetHeight ? r.height / wrapper.offsetHeight : 1) || 1;
+      let top = 8;
+      let bottom = view.innerHeight - 8;
+      for (let p = wrapper.parentElement; p; p = p.parentElement) {
+        if (p === wrapper.ownerDocument.body || p === wrapper.ownerDocument.documentElement) continue;
+        if (/^(auto|scroll|hidden|clip)$/.test(view.getComputedStyle(p).overflowY)) {
+          const b = p.getBoundingClientRect();
+          top = Math.max(top, b.top + 8);
+          bottom = Math.min(bottom, b.bottom - 8);
+        }
       }
-      return next;
-    });
-  };
+      const below = Math.max(0, (bottom - r.bottom) / scale - 2);
+      const above = Math.max(0, (r.top - top) / scale - 2);
+      const visible = maxVisibleOptions ?? 0;
+      const rows = visible > 0 ? itemRefs.current.slice(0, visible).filter(Boolean) : [];
+      const wanted = rows.length
+        ? rows.reduce((sum, row) => sum + (row?.offsetHeight ?? 0), 0) + (rows.length - 1) * 2 + 2
+        : requestedHeight;
+      const up = below < wanted && above > below;
+      setOpenUp(up);
+      setListMaxHeight(Math.min(wanted, up ? above : below));
+    };
+    measure();
+    view.addEventListener("resize", measure);
+    view.addEventListener("scroll", measure, true);
+    return () => {
+      view.removeEventListener("resize", measure);
+      view.removeEventListener("scroll", measure, true);
+    };
+  }, [expanded, requestedHeight, options.length]);
+
+  const toggle = () => setExpanded((prev) => !prev);
 
   const optionCls = `${uid}-option`;
   const selectedCls = `${uid}-selected`;
@@ -502,7 +532,13 @@ export const AnchoredDropdown: React.FC<AnchoredDropdownProps> = ({
                   className={`${optionCls}${isSelected ? ` ${selectedCls}` : ""}`}
                   onClick={() => pick(opt.value)}
                 >
-                  <span>{opt.label}</span>
+                  {renderOptionLabel ? (
+                    <span style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+                      {renderOptionLabel(opt)}
+                    </span>
+                  ) : (
+                    <span>{opt.label}</span>
+                  )}
                   {isSelected && <FaCheck size={10} />}
                 </DialogButton>
               );
