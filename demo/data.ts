@@ -122,6 +122,11 @@ export const COMPONENTS = [
       "title only, no description or children",
     ],
   },
+  {
+    id: "tab-bar",
+    label: "TabBar",
+    examples: ["three pages", "without hints", "custom colors and hints"],
+  },
 ];
 
 // Hash format is "#component-id/example-id" — the example segment is

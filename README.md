@@ -376,6 +376,39 @@ import { StatusCard } from "@moi952/decky-ui-kit";
 
 </details>
 
+### `TabBar`
+
+Icon tabs flanked by white bumper hints (LB / RB on Xbox, L1 / R1 on PlayStation and Steam, L / R on Switch — following the pad in use), controlled by the parent (`activeId` / `onSelect`). The icons are click/touch only — the gamepad never lands on them: L1 / R1 switch page from anywhere inside `children` (not only while the bar has focus), stopping at both ends. `children` is the page under the bar. After a page switch or on mount, focus is put back on the first control of the page (`restoreFocus`), because without focus inside the page the next bumper press would go to Steam instead of the bar.
+
+```tsx
+import { TabBar } from "@moi952/decky-ui-kit";
+
+<TabBar items={tabs} activeId={tab} onSelect={setTab}>
+  {page}
+</TabBar>
+```
+
+<details>
+<summary>Props</summary>
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `items` | `{ id: string; icon: ReactNode; label: string }[]` | — | The tabs, in order. `label` is the tooltip / accessible name. |
+| `activeId` | `string` | — | Id of the selected tab. |
+| `onSelect` | `(id: string) => void` | — | Called on icon click or L1 / R1. |
+| `children` | `ReactNode` | — | The page under the bar; L1 / R1 work from anywhere inside it. |
+| `activeColor` | `string` | `"#d0d5dc"` | Selected icon color. |
+| `inactiveColor` | `string` | `"#4b515b"` | Other icons' color. |
+| `showHints` | `boolean` | `true` | Show the bumper pills at both ends. |
+| `controller` | `"auto" \| "xbox" \| "playstation" \| "switch" \| "steam"` | `"auto"` | Which pad's bumper names to show; `auto` follows the pad in use (read from Steam's internal state, falls back to L1 / R1). |
+| `previousHint` | `string` | from `controller` | Overrides the left pill text. |
+| `nextHint` | `string` | from `controller` | Overrides the right pill text. |
+| `hintBackground` | `string` | `"#ffffff"` | Pills' background. |
+| `hintColor` | `string` | `"#14181d"` | Pills' text color. |
+| `restoreFocus` | `boolean` | `true` | Refocus the first control of the page after a switch / on mount. |
+
+</details>
+
 ## Hooks
 
 ### `useRemoteJson`

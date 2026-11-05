@@ -13,6 +13,7 @@ import { MediaRowDemo } from "./components/MediaRowDemo";
 import { QrCodeButtonDemo } from "./components/QrCodeButtonDemo";
 import { ScreenshotCarouselDemo } from "./components/ScreenshotCarouselDemo";
 import { StatusCardDemo } from "./components/StatusCardDemo";
+import { TabBarDemo } from "./components/TabBarDemo";
 import { VersionSwitcher } from "./components/VersionSwitcher";
 import { FOOTER_HINT_EVENT, FooterHint } from "./mocks/decky-ui";
 
@@ -323,6 +324,7 @@ const App: React.FC = () => {
             {active === "qr-code-button" && <QrCodeButtonDemo />}
             {active === "screenshot-carousel" && <ScreenshotCarouselDemo />}
             {active === "status-card" && <StatusCardDemo />}
+            {active === "tab-bar" && <TabBarDemo />}
           </div>
         </div>
       </div>

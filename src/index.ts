@@ -18,5 +18,7 @@ export { ScreenshotCarousel } from "./ScreenshotCarousel";
 export type { ScreenshotCarouselProps } from "./ScreenshotCarousel";
 export { StatusCard } from "./StatusCard";
 export type { StatusCardProps } from "./StatusCard";
+export { TabBar } from "./TabBar";
+export type { TabBarProps, TabBarItem } from "./TabBar";
 export { useRemoteJson } from "./useRemoteJson";
 export type { UseRemoteJsonResult } from "./useRemoteJson";
